@@ -8,6 +8,8 @@ use serde::Serialize;
 use sqlx::PgPool;
 use tokio::net::TcpListener;
 
+mod routes;
+
 #[derive(Debug)]
 struct Error(anyhow::Error);
 impl<T: Into<anyhow::Error>> From<T> for Error {
@@ -41,7 +43,10 @@ async fn main() -> Result<(), Error> {
 
     sqlx::migrate!("./migrations").run(&db).await?;
 
-    let app = Router::new().with_state(db);
+    let app = Router::new()
+        .nest("/categories", routes::categories::router())
+        .nest("/roles", routes::roles::router())
+        .with_state(db);
     let listener = TcpListener::bind("0.0.0.0:8080").await?;
 
     axum::serve(listener, app).await?;
