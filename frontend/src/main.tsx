@@ -10,6 +10,7 @@ import NotFound from "./components/NotFound/NotFound";
 
 import MainPage from "./pages/MainPage/MainPage";
 import AuthPage from "./pages/AuthPage/AuthPage";
+import AccessLogPage from './pages/AccessLogPage/AccessLogPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
       {
         path: '/auth',
         element: <AuthPage />
+      },
+      {
+        path: '/accesslog',
+        element: <AccessLogPage />
       },
       {
         path: '*',
