@@ -1,3 +1,5 @@
+import './NavigationCard.scss';
+
 const NavigationCard: React.FC<{ imageUrl: string; title: string; link: string }> = ({ imageUrl, title, link }) => {
     return (
         <a href={link} className="uk-button uk-button-text" target="_blank">
