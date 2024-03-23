@@ -12,7 +12,7 @@ import test_6 from "../../assets/software_po.svg";
 const NavigationCardList = [
     {
         imageUrl: test_1,
-        title: "Журнал событий",
+        title: "Загрузка...",
         link: "/",
     },
     {
@@ -22,8 +22,8 @@ const NavigationCardList = [
     },
     {
         imageUrl: test_3,
-        title: "Логи",
-        link: "/",
+        title: "Журнал посещений",
+        link: "/accesslog",
     },
     {
         imageUrl: test_4,
