@@ -8,6 +8,8 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import './index.css'
 import NotFound from "./components/NotFound/NotFound";
 
+import MainPage from "./pages/MainPage/MainPage";
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -15,7 +17,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <NotFound />
+        element: <MainPage />
       },
       {
         path: '*',
