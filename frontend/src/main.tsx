@@ -9,6 +9,7 @@ import './index.css'
 import NotFound from "./components/NotFound/NotFound";
 
 import MainPage from "./pages/MainPage/MainPage";
+import AuthPage from "./pages/AuthPage/AuthPage";
 
 const router = createBrowserRouter([
   {
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
       {
         path: '/',
         element: <MainPage />
+      },
+      {
+        path: '/auth',
+        element: <AuthPage />
       },
       {
         path: '*',
