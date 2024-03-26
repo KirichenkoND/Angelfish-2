@@ -1,37 +1,14 @@
 use super::{Json, RouteResult, RouteState};
+use crate::models::{Permission, Target, User};
 use axum::{extract::State, http::Method, routing::*};
-use serde::Deserialize;
 use sqlx::PgPool;
-use uuid::Uuid;
-
-#[derive(Debug, Deserialize)]
-#[serde(untagged)]
-enum Target {
-    Room { room_id: i32 },
-    Category { category: String },
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(untagged)]
-enum User {
-    Role { role: String },
-    Person { person_uuid: Uuid },
-}
-
-#[derive(Debug, Deserialize)]
-struct Perm {
-    #[serde(flatten)]
-    target: Target,
-    #[serde(flatten)]
-    user: User,
-}
 
 async fn change_perms(
     method: Method,
     State(db): RouteState,
-    Json(data): Json<Perm>,
+    Json(data): Json<Permission>,
 ) -> RouteResult {
-    let Perm { target, user } = data;
+    let Permission { target, user } = data;
 
     let (person_uuid, role) = match user {
         User::Person { person_uuid } => (Some(person_uuid), None),

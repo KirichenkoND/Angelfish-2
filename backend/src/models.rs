@@ -2,6 +2,28 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+pub enum Target {
+    Room { room_id: i32 },
+    Category { category: String },
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+pub enum User {
+    Role { role: String },
+    Person { person_uuid: Uuid },
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Permission {
+    #[serde(flatten)]
+    pub target: Target,
+    #[serde(flatten)]
+    pub user: User,
+}
+
 #[derive(Debug, FromRow, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Room {

@@ -1,9 +1,14 @@
 use super::{Json, Query, RouteResult, RouteState};
 use crate::models::Room;
 use anyhow::anyhow;
-use axum::{extract::State, routing::*};
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    routing::*,
+};
 use serde::Deserialize;
 use sqlx::{error::ErrorKind, PgPool};
+use uuid::Uuid;
 
 #[derive(Deserialize)]
 struct Fetch {
@@ -81,6 +86,53 @@ async fn create(State(db): RouteState, Json(query): Json<Room>) -> RouteResult {
     }
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "lowercase")]
+enum Direction {
+    Enter,
+    Leave,
+}
+
+async fn pass(
+    State(db): RouteState,
+    Path((room_id, dir, person_uuid)): Path<(i32, Direction, Uuid)>,
+) -> RouteResult<StatusCode> {
+    let allowed = sqlx::query!(
+        r#"
+        SELECT 1 as allowed FROM Permission
+        WHERE
+            (room_id = $1 OR category_id = (SELECT Room.category_id FROM Room WHERE id = $1))
+            AND
+            (person_uuid = $2 OR role_id = (SELECT role_id FROM Person WHERE uuid = $2))
+    "#,
+        room_id,
+        person_uuid
+    )
+    .fetch_optional(&db)
+    .await?
+    .is_some();
+
+    let entered = matches!(dir, Direction::Enter);
+    sqlx::query!(
+        "INSERT INTO Log(person_uuid, room_id, entered, allowed) VALUES($1, $2, $3, $4)",
+        person_uuid,
+        room_id,
+        entered,
+        allowed
+    )
+    .execute(&db)
+    .await?;
+
+    let code = if allowed {
+        StatusCode::OK
+    } else {
+        StatusCode::FORBIDDEN
+    };
+    Ok(code)
+}
+
 pub fn router() -> Router<PgPool> {
-    Router::new().route("/", get(fetch).post(create))
+    Router::new()
+        .route("/", get(fetch).post(create))
+        .route("/:room_id/:direction/:person_uuid", post(pass))
 }
