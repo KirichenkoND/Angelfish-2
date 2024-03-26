@@ -1,8 +1,9 @@
 use super::{Json, Query, RouteResult, RouteState};
 use crate::models::Room;
+use anyhow::anyhow;
 use axum::{extract::State, routing::*};
 use serde::Deserialize;
-use sqlx::PgPool;
+use sqlx::{error::ErrorKind, PgPool};
 
 #[derive(Deserialize)]
 struct Fetch {
@@ -51,6 +52,35 @@ async fn fetch(State(db): RouteState, Query(query): Query<Fetch>) -> RouteResult
     Ok(Json(results))
 }
 
+async fn create(State(db): RouteState, Json(query): Json<Room>) -> RouteResult {
+    let Room {
+        id: _,
+        category,
+        floor,
+        name,
+    } = query;
+
+    let result = sqlx::query!(
+        r#"
+        INSERT INTO Room(room, floor, category_id) VALUES($1, $2, (SELECT id FROM Category WHERE category = $3)) 
+    "#,
+        name,
+        floor,
+        category
+    ).execute(&db).await;
+
+    match result {
+        Ok(_) => Ok(()),
+        Err(err) if matches!(err.as_database_error(), Some(err) if err.kind() == ErrorKind::NotNullViolation) => {
+            Err(anyhow!("This room category does not exist").into())
+        }
+        Err(err) if matches!(err.as_database_error(), Some(err) if err.is_unique_violation()) => {
+            Err(anyhow!("Room with this name already exists on the floor").into())
+        }
+        Err(err) => Err(err.into()),
+    }
+}
+
 pub fn router() -> Router<PgPool> {
-    Router::new().route("/", get(fetch))
+    Router::new().route("/", get(fetch).post(create))
 }
