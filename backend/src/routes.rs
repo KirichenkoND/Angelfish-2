@@ -25,6 +25,7 @@ struct Query<T>(pub T);
 pub mod categories;
 pub mod people;
 pub mod roles;
+pub mod rooms;
 
 pub type RouteState = State<PgPool>;
 pub type RouteResult<T = ()> = Result<T, crate::error::Error>;
