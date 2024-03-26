@@ -7,7 +7,7 @@ use sqlx::PgPool;
 
 #[derive(FromRequest)]
 #[from_request(via(axum::Json))]
-#[from_request(rejection(crate::Error))]
+#[from_request(rejection(crate::error::Error))]
 struct Json<T>(pub T);
 
 impl<T: Serialize> IntoResponse for Json<T> {
@@ -19,11 +19,12 @@ impl<T: Serialize> IntoResponse for Json<T> {
 
 #[derive(FromRequestParts)]
 #[from_request(via(axum::extract::Query))]
-#[from_request(rejection(crate::Error))]
+#[from_request(rejection(crate::error::Error))]
 struct Query<T>(pub T);
 
 pub mod categories;
+pub mod people;
 pub mod roles;
 
 pub type RouteState = State<PgPool>;
-pub type RouteResult<T = ()> = Result<T, crate::Error>;
+pub type RouteResult<T = ()> = Result<T, crate::error::Error>;

@@ -18,7 +18,7 @@ CREATE TABLE Role(
 );
 
 INSERT INTO Role(role) VALUES
-    ('studen'),
+    ('student'),
     ('teacher'),
     ('admin'),
     ('security'),
