@@ -24,6 +24,7 @@ struct Query<T>(pub T);
 
 pub mod categories;
 pub mod people;
+pub mod perms;
 pub mod roles;
 pub mod rooms;
 
