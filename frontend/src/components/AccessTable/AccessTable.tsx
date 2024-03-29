@@ -1,5 +1,6 @@
 import React from 'react';
 import "./AccessTable.scss";
+import SearchBar from '../../UI/SearchBar/SearchBar';
 
 const data = [
     { ID: 0, CardID: 222, RoomID: 333, AccessTimeStamp: "12.03.2024 12:00", AccessResult: true },
@@ -29,28 +30,31 @@ const data = [
 
 const AccessTable: React.FC = () => {
     return (
-        <table className="AccessTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>CardID</th>
-                    <th>RoomID</th>
-                    <th>AccessTimeStamp</th>
-                    <th>AccessResult</th>
-                </tr>
-            </thead>
-            <tbody>
-                {data.slice().reverse().slice(0, 10).map((item) => (
-                    <tr key={item.ID} className={item.AccessResult ? "" : "failed"}>
-                        <td>{item.ID}</td>
-                        <td>{item.CardID}</td>
-                        <td>{item.RoomID}</td>
-                        <td>{item.AccessTimeStamp}</td>
-                        <td>{item.AccessResult ? "True" : "False"}</td>
+        <>
+            <SearchBar />
+            <table className="AccessTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>CardID</th>
+                        <th>RoomID</th>
+                        <th>AccessTimeStamp</th>
+                        <th>AccessResult</th>
                     </tr>
-                ))}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {data.slice().reverse().slice(0, 10).map((item) => (
+                        <tr key={item.ID} className={item.AccessResult ? "" : "failed"}>
+                            <td>{item.ID}</td>
+                            <td>{item.CardID}</td>
+                            <td>{item.RoomID}</td>
+                            <td>{item.AccessTimeStamp}</td>
+                            <td>{item.AccessResult ? "True" : "False"}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </>
     );
 }
 
