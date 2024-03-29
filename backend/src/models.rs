@@ -3,26 +3,16 @@ use sqlx::FromRow;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
-#[derive(Debug, Deserialize)]
-#[serde(untagged)]
-pub enum Target {
-    Room { room_id: i32 },
-    Category { category: String },
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(untagged)]
-pub enum User {
-    Role { role: String },
-    Person { person_uuid: Uuid },
-}
-
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromRow, Serialize, Deserialize)]
 pub struct Permission {
-    #[serde(flatten)]
-    pub target: Target,
-    #[serde(flatten)]
-    pub user: User,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub room_id: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub category: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub role: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub person_uuid: Option<Uuid>,
 }
 
 #[derive(Debug, FromRow, Serialize, Deserialize)]
@@ -55,7 +45,6 @@ pub struct Person {
 
 #[derive(Debug, FromRow, Serialize)]
 pub struct Log {
-    pub id: i32,
     pub time: OffsetDateTime,
     pub person_uuid: Uuid,
     pub room_id: i32,

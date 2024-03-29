@@ -1,8 +1,9 @@
 use super::{Json, Query, RouteResult, RouteState};
-use crate::models::{Permission, Target, User};
+use crate::models::Permission;
+use anyhow::anyhow;
 use axum::{extract::State, http::Method, routing::*};
-use serde::{Deserialize, Serialize};
-use sqlx::{prelude::FromRow, PgPool};
+use serde::Deserialize;
+use sqlx::PgPool;
 use uuid::Uuid;
 
 #[derive(Deserialize)]
@@ -15,22 +16,10 @@ struct FetchQuery {
     offset: Option<i64>,
 }
 
-#[derive(Serialize, FromRow)]
-struct Out {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    person_uuid: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    category: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    role: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    room_id: Option<i32>,
-}
-
 async fn fetch(
     State(db): RouteState,
     Query(query): Query<FetchQuery>,
-) -> RouteResult<Json<Vec<Out>>> {
+) -> RouteResult<Json<Vec<Permission>>> {
     let FetchQuery {
         room_id,
         category,
@@ -40,7 +29,7 @@ async fn fetch(
         offset,
     } = query;
 
-    let records = sqlx::query_as::<_, Out>(
+    let records = sqlx::query_as::<_, Permission>(
         r#"
         SELECT * FROM Permission
         LEFT JOIN Role ON Role.id = role_id
@@ -70,17 +59,20 @@ async fn change_perms(
     State(db): RouteState,
     Json(data): Json<Permission>,
 ) -> RouteResult {
-    let Permission { target, user } = data;
+    let Permission {
+        room_id,
+        category,
+        role,
+        person_uuid,
+    } = data;
 
-    let (person_uuid, role) = match user {
-        User::Person { person_uuid } => (Some(person_uuid), None),
-        User::Role { role } => (None, Some(role)),
-    };
+    if room_id.zip(category.as_ref()).is_some() {
+        return Err(anyhow!("Only one of `room_id` and `category` must be specified").into());
+    }
 
-    let (room_id, category) = match target {
-        Target::Room { room_id } => (Some(room_id), None),
-        Target::Category { category } => (None, Some(category)),
-    };
+    if person_uuid.zip(role.as_ref()).is_some() {
+        return Err(anyhow!("Only one of `role` and `person_uuid` must be specified").into());
+    }
 
     let allow = method == Method::POST;
     if allow {
