@@ -8,27 +8,25 @@
     display: flex;
     min-height: 80px;
     align-items: center;
-    // background-color: #0b7a77;
-    background-color: rgba(184, 184, 184, 1);
-}
-
-.header-logo {
-    margin-left: 10vw;
-}
-
-.auth-button {
-    margin-left: auto;
-    margin-right: 10px;
-    display: flex;
-    justify-items: flex-end;
-}
-
-.auth-button-user {
-    margin-left: auto;
-    margin-right: 10px;
-    display: flex;
-    justify-items: flex-end;
     justify-content: center;
-    align-items: center;
-    color: white;
+    // background-color: #0b7a77;
+    background-color: rgb(56, 23, 202);
+    border-radius: 0 0 30% 30%;
 }
+
+// .auth-button {
+//     margin-left: auto;
+//     margin-right: 10px;
+//     display: flex;
+//     justify-items: flex-end;
+// }
+
+// .auth-button-user {
+//     margin-left: auto;
+//     margin-right: 10px;
+//     display: flex;
+//     justify-items: flex-end;
+//     justify-content: center;
+//     align-items: center;
+//     color: white;
+// }
