@@ -104,6 +104,7 @@ async fn pass(
             (room_id = $1 OR category_id = (SELECT Room.category_id FROM Room WHERE id = $1))
             AND
             (person_uuid = $2 OR role_id = (SELECT role_id FROM Person WHERE uuid = $2))
+        LIMIT 1
     "#,
         room_id,
         person_uuid
