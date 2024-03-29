@@ -25,7 +25,7 @@ const HeaderLinks = [
         path: "/editor",
     },
     {
-        text: "ПОЛЬЗАватели",
+        text: "Пользователи",
         path: "/editor",
     },
     {

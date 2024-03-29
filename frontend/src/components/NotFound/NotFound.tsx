@@ -11,7 +11,6 @@ const NotFound: React.FC = () => {
                 visible
                 height={80}
                 width={80}
-                
             />
         </>
     );
