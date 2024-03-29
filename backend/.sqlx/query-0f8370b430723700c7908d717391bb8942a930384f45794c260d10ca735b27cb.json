@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT category FROM Category\n            WHERE lower(category) LIKE coalesce('%' || lower($1) || '%', '%')\n            ORDER BY category\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "category",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "0f8370b430723700c7908d717391bb8942a930384f45794c260d10ca735b27cb"
+}

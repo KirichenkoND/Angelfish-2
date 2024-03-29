@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM Category WHERE category = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "efd88e5c6650851eaf36e2ce832d8c697bed6b3ca612d47c6022df435dd56e8a"
+}

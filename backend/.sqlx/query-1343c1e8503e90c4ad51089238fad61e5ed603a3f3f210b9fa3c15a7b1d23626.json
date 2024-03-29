@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO Log(person_uuid, room_id, entered, allowed) VALUES($1, $2, $3, $4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4",
+        "Bool",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1343c1e8503e90c4ad51089238fad61e5ed603a3f3f210b9fa3c15a7b1d23626"
+}

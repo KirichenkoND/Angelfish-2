@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT 1 as allowed FROM Permission\n        WHERE\n            (room_id = $1 OR category_id = (SELECT Room.category_id FROM Room WHERE id = $1))\n            AND\n            (person_uuid = $2 OR role_id = (SELECT role_id FROM Person WHERE uuid = $2))\n        LIMIT 1\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "allowed",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "28640092fb1c35e1f8cb1d963b8f1b6f400f0ff91946bfeba0faf6751962395c"
+}
