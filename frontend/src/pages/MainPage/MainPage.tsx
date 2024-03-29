@@ -33,7 +33,7 @@ const NavigationCardList = [
     {
         imageUrl: test_5,
         title: "Пользователи",
-        link: "/",
+        link: "/users",
     },
     {
         imageUrl: test_6,

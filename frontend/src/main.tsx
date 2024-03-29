@@ -11,6 +11,7 @@ import NotFound from "./components/NotFound/NotFound";
 import MainPage from "./pages/MainPage/MainPage";
 import AuthPage from "./pages/AuthPage/AuthPage";
 import AccessLogPage from './pages/AccessLogPage/AccessLogPage.tsx';
+import UsersPage from './pages/UsersPage/UsersPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
       {
         path: '/accesslog',
         element: <AccessLogPage />
+      },
+      {
+        path: '/users',
+        element: <UsersPage />
       },
       {
         path: '*',
