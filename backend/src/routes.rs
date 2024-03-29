@@ -23,6 +23,7 @@ impl<T: Serialize> IntoResponse for Json<T> {
 struct Query<T>(pub T);
 
 pub mod categories;
+pub mod logs;
 pub mod people;
 pub mod perms;
 pub mod roles;

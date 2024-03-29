@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
@@ -50,4 +51,14 @@ pub struct Person {
     pub banned: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ban_reason: Option<String>,
+}
+
+#[derive(Debug, FromRow, Serialize)]
+pub struct Log {
+    pub id: i32,
+    pub time: OffsetDateTime,
+    pub person_uuid: Uuid,
+    pub room_id: i32,
+    pub allowed: bool,
+    pub entered: bool,
 }

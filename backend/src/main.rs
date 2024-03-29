@@ -36,6 +36,7 @@ async fn main() -> Result<(), error::Error> {
         .nest("/people", routes::people::router())
         .nest("/rooms", routes::rooms::router())
         .nest("/permissions", routes::perms::router())
+        .nest("/logs", routes::logs::router())
         .with_state(db);
 
     let listener = TcpListener::bind("0.0.0.0:8080").await?;
