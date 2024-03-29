@@ -12,6 +12,8 @@ import MainPage from "./pages/MainPage/MainPage";
 import AuthPage from "./pages/AuthPage/AuthPage";
 import AccessLogPage from './pages/AccessLogPage/AccessLogPage.tsx';
 import UsersPage from './pages/UsersPage/UsersPage.tsx';
+import SearchPage from './pages/SearchPage/SearchPage.tsx';
+import AccessEditorPage from './pages/AccessEditorPage/AccessEditorPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -33,6 +35,14 @@ const router = createBrowserRouter([
       {
         path: '/users',
         element: <UsersPage />
+      },
+      {
+        path: '/search',
+        element: <SearchPage />
+      },
+      {
+        path: '/accesseditor',
+        element: <AccessEditorPage />
       },
       {
         path: '*',

@@ -13,12 +13,12 @@ const NavigationCardList = [
     {
         imageUrl: test_1,
         title: "Загрузка...",
-        link: "/",
+        link: "/idk",
     },
     {
         imageUrl: test_2,
         title: "Работа с пропусками",
-        link: "/",
+        link: "/accesseditor",
     },
     {
         imageUrl: test_3,
@@ -28,7 +28,7 @@ const NavigationCardList = [
     {
         imageUrl: test_4,
         title: "Поиск",
-        link: "/",
+        link: "/search",
     },
     {
         imageUrl: test_5,
@@ -38,7 +38,7 @@ const NavigationCardList = [
     {
         imageUrl: test_6,
         title: "Настройки",
-        link: "/",
+        link: "/settings",
     }
 ];
 
