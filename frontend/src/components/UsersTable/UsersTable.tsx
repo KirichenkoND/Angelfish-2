@@ -3,6 +3,7 @@ import "./UsersTable.scss";
 import SearchBar from '../../UI/SearchBar/SearchBar';
 
 import edit_button from "../../assets/edit_button.svg";
+import delete_button from "../../assets/delete_button.svg";
 
 const data = [
     { ID: 111, Lastname: "Иванов", Firstname: "Иван", Middlename: "Иванович", Date_Birth: "01.01.2002", Active: true, CategoryID: 0 },
@@ -40,6 +41,7 @@ const UsersTable: React.FC = () => {
                             <td>
                                 <a>
                                     <img src={edit_button} style={{ width: '20px', height: '20px' }}></img>
+                                    <img src={delete_button} style={{ width: '20px', height: '20px' }}></img>
                                 </a>
                             </td>
                         </tr>
