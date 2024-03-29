@@ -11,7 +11,27 @@ const HeaderLinks = [
     {
         text: "Редактор",
         path: "/editor",
-    }
+    },
+    {
+        text: "Попуски",
+        path: "/editor",
+    },
+    {
+        text: "Журнал Посещений",
+        path: "/editor",
+    },
+    {
+        text: "Поиск",
+        path: "/editor",
+    },
+    {
+        text: "ПОЛЬЗАватели",
+        path: "/editor",
+    },
+    {
+        text: "Настройки",
+        path: "/editor",
+    },
 ];
 
 export const Header: React.FC = () => {
