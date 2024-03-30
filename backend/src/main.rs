@@ -31,7 +31,9 @@ async fn main() -> Result<(), error::Error> {
     debug!("Migrating database schema");
     sqlx::migrate!("./migrations").run(&db).await?;
 
-    let openapi = routes::categories::openapi();
+    let mut openapi = routes::categories::openapi();
+    openapi.merge(routes::roles::openapi());
+
     let swagger = SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", openapi);
 
     let app = Router::new()

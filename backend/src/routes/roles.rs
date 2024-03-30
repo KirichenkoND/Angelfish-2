@@ -7,12 +7,15 @@ use axum::{
 };
 use serde::Deserialize;
 use sqlx::PgPool;
+use utoipa::{openapi::OpenApi, IntoParams};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, IntoParams)]
 struct FetchQuery {
     name: Option<String>,
 }
 
+/// Fetch user roles
+#[utoipa::path(get, path = "/roles", params(FetchQuery), responses((status = 200, body = Vec<String>)))]
 async fn fetch(
     State(db): RouteState,
     Query(query): Query<FetchQuery>,
@@ -34,6 +37,8 @@ async fn fetch(
     Ok(Json(results))
 }
 
+/// Create new user role
+#[utoipa::path(post, path = "/roles/:role", params(("role" = String, Path, description = "New user role name")))]
 async fn create(Path(role): Path<String>, State(db): RouteState) -> RouteResult<()> {
     let result = sqlx::query!("INSERT INTO Role(role) VALUES($1)", role)
         .execute(&db)
@@ -49,6 +54,8 @@ async fn create(Path(role): Path<String>, State(db): RouteState) -> RouteResult<
     Ok(())
 }
 
+/// Delete user role
+#[utoipa::path(delete, path = "/roles/:role", params(("role" = String, Path, description = "User role name")))]
 async fn remove(Path(category): Path<String>, State(db): RouteState) -> RouteResult<StatusCode> {
     let result = sqlx::query!("DELETE FROM Role WHERE role = $1", category)
         .execute(&db)
@@ -58,6 +65,14 @@ async fn remove(Path(category): Path<String>, State(db): RouteState) -> RouteRes
     }
 
     Ok(StatusCode::OK)
+}
+
+pub fn openapi() -> OpenApi {
+    #[derive(utoipa::OpenApi)]
+    #[openapi(paths(fetch, create, remove))]
+    struct ApiDoc;
+
+    <ApiDoc as utoipa::OpenApi>::openapi()
 }
 
 pub fn router() -> Router<PgPool> {

@@ -15,7 +15,9 @@ struct FetchQuery {
 }
 
 /// Fetch room categories
-#[utoipa::path(get, path = "/categories", params(FetchQuery))]
+#[utoipa::path(get, path = "/categories", params(FetchQuery), responses(
+    (status = 200, body = Vec<String>)
+))]
 async fn fetch(
     State(db): RouteState,
     Query(query): Query<FetchQuery>,
@@ -39,7 +41,7 @@ async fn fetch(
 
 /// Create new category
 #[utoipa::path(post, path = "/categories/:category", params(("category" = String, Path, description = "New category name")))]
-async fn create(Path(category): Path<String>, State(db): RouteState) -> RouteResult<()> {
+async fn create(Path(category): Path<String>, State(db): RouteState) -> RouteResult {
     let result = sqlx::query!("INSERT INTO Category(category) VALUES($1)", category)
         .execute(&db)
         .await;
@@ -69,7 +71,7 @@ async fn remove(Path(category): Path<String>, State(db): RouteState) -> RouteRes
 
 pub fn openapi() -> OpenApi {
     #[derive(utoipa::OpenApi)]
-    #[openapi(paths(fetch, create))]
+    #[openapi(paths(fetch, create, remove))]
     struct ApiDoc;
 
     <ApiDoc as utoipa::OpenApi>::openapi()
