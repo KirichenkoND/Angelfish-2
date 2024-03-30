@@ -14,6 +14,7 @@ COPY ./.sqlx ./.sqlx
 COPY ./migrations ./migrations
 COPY ./src ./src
 
+RUN echo -e '\n' >> src/main.rs
 RUN cargo build --release
 
 FROM alpine

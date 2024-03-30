@@ -4,13 +4,14 @@ use axum::{extract::State, routing::get, Router};
 use serde::Deserialize;
 use sqlx::PgPool;
 use time::OffsetDateTime;
+use utoipa::{openapi::OpenApi, IntoParams};
 use uuid::Uuid;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, IntoParams)]
 struct FetchQuery {
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(with = "time::serde::rfc3339::option", default)]
     before: Option<OffsetDateTime>,
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(with = "time::serde::rfc3339::option", default)]
     after: Option<OffsetDateTime>,
     person_uuid: Option<Uuid>,
     room_id: Option<i32>,
@@ -20,6 +21,15 @@ struct FetchQuery {
     offset: Option<i64>,
 }
 
+/// Get logs
+#[utoipa::path(
+    get,
+    path = "/logs",
+    params(FetchQuery),
+    responses(
+        (status = 200, body = Vec<Log>)
+    )
+)]
 async fn fetch(
     State(db): RouteState,
     Query(query): Query<FetchQuery>,
@@ -57,6 +67,14 @@ async fn fetch(
         .fetch_all(&db).await?;
 
     Ok(Json(results))
+}
+
+pub fn openapi() -> OpenApi {
+    #[derive(utoipa::OpenApi)]
+    #[openapi(paths(super::logs::fetch), components(schemas(Log)))]
+    struct ApiDoc;
+
+    <ApiDoc as utoipa::OpenApi>::openapi()
 }
 
 pub fn router() -> Router<PgPool> {

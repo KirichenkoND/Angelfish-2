@@ -4,7 +4,7 @@ use time::OffsetDateTime;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-#[derive(Debug, FromRow, Serialize, Deserialize)]
+#[derive(Debug, FromRow, ToSchema, Serialize, Deserialize)]
 pub struct Permission {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub room_id: Option<i32>,
@@ -16,7 +16,7 @@ pub struct Permission {
     pub person_uuid: Option<Uuid>,
 }
 
-#[derive(Debug, FromRow, Serialize, Deserialize)]
+#[derive(Debug, FromRow, ToSchema, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Room {
     #[serde(skip_deserializing)]
@@ -43,7 +43,7 @@ pub struct Person {
     pub ban_reason: Option<String>,
 }
 
-#[derive(Debug, FromRow, Serialize)]
+#[derive(Debug, FromRow, ToSchema, Serialize)]
 pub struct Log {
     pub time: OffsetDateTime,
     pub person_uuid: Uuid,

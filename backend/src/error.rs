@@ -7,7 +7,8 @@ use axum::{
 pub struct Error(anyhow::Error);
 impl<T: Into<anyhow::Error>> From<T> for Error {
     fn from(err: T) -> Self {
-        Self(err.into())
+        let anyhow = err.into();
+        Self(anyhow)
     }
 }
 

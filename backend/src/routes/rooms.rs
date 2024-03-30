@@ -8,9 +8,10 @@ use axum::{
 };
 use serde::Deserialize;
 use sqlx::{error::ErrorKind, PgPool};
+use utoipa::{openapi::OpenApi, IntoParams, ToSchema};
 use uuid::Uuid;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, IntoParams)]
 struct Fetch {
     floor: Option<i32>,
     category: Option<String>,
@@ -19,6 +20,15 @@ struct Fetch {
     offset: Option<i64>,
 }
 
+/// Fetch rooms
+#[utoipa::path(
+    get,
+    path = "/rooms",
+    params(Fetch),
+    responses(
+        (status = 200, body = Vec<Room>)
+    )
+)]
 async fn fetch(State(db): RouteState, Query(query): Query<Fetch>) -> RouteResult<Json<Vec<Room>>> {
     let Fetch {
         floor,
@@ -57,13 +67,20 @@ async fn fetch(State(db): RouteState, Query(query): Query<Fetch>) -> RouteResult
     Ok(Json(results))
 }
 
-async fn create(State(db): RouteState, Json(query): Json<Room>) -> RouteResult {
+/// Create new room
+/// Only `category`, `floor`, `name` fields are used.
+#[utoipa::path(
+    post,
+    path = "/rooms",
+    request_body = Room
+)]
+async fn create(State(db): RouteState, Json(data): Json<Room>) -> RouteResult {
     let Room {
         id: _,
         category,
         floor,
         name,
-    } = query;
+    } = data;
 
     let result = sqlx::query!(
         r#"
@@ -86,13 +103,19 @@ async fn create(State(db): RouteState, Json(query): Json<Room>) -> RouteResult {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, ToSchema)]
 #[serde(rename_all = "lowercase")]
 enum Direction {
     Enter,
     Leave,
 }
 
+/// Try to enter/leave a room (EMBEDDED API)
+#[utoipa::path(post, path = "/rooms/:room_id/:direction/:person_uuid", params(
+    ("room_id" = i32, Path, description = "Id of the room"),
+    ("direction" = Direction, Path, description = "Enter/leave"),
+    ("person_uuid" = Uuid, Path, description = "Uuid of the person trying to access the room")
+))]
 async fn pass(
     State(db): RouteState,
     Path((room_id, dir, person_uuid)): Path<(i32, Direction, Uuid)>,
@@ -132,8 +155,38 @@ async fn pass(
     Ok(code)
 }
 
+/// Delete room
+#[utoipa::path(delete, path = "/rooms/:room_id", params(("room_id" = i32, Path, description = "Id of the room to delete")))]
+async fn remove(Path(room_id): Path<i32>, State(db): RouteState) -> RouteResult<StatusCode> {
+    let result = sqlx::query!("DELETE FROM Room WHERE id = $1", room_id)
+        .execute(&db)
+        .await?;
+    if result.rows_affected() == 0 {
+        return Ok(StatusCode::NOT_FOUND);
+    }
+
+    Ok(StatusCode::OK)
+}
+
+pub fn openapi() -> OpenApi {
+    #[derive(utoipa::OpenApi)]
+    #[openapi(
+        paths(
+            super::rooms::fetch,
+            super::rooms::create,
+            super::rooms::remove,
+            super::rooms::pass
+        ),
+        components(schemas(Room))
+    )]
+    struct ApiDoc;
+
+    <ApiDoc as utoipa::OpenApi>::openapi()
+}
+
 pub fn router() -> Router<PgPool> {
     Router::new()
         .route("/", get(fetch).post(create))
+        .route("/:room_id", delete(remove))
         .route("/:room_id/:direction/:person_uuid", post(pass))
 }

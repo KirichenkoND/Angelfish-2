@@ -34,6 +34,9 @@ async fn main() -> Result<(), error::Error> {
     let mut openapi = routes::categories::openapi();
     openapi.merge(routes::roles::openapi());
     openapi.merge(routes::people::openapi());
+    openapi.merge(routes::rooms::openapi());
+    openapi.merge(routes::perms::openapi());
+    openapi.merge(routes::logs::openapi());
 
     let swagger = SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", openapi);
 

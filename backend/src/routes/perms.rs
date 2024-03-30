@@ -4,9 +4,10 @@ use anyhow::anyhow;
 use axum::{extract::State, http::Method, routing::*};
 use serde::Deserialize;
 use sqlx::PgPool;
+use utoipa::{openapi::OpenApi, IntoParams};
 use uuid::Uuid;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, IntoParams)]
 struct FetchQuery {
     room_id: Option<i32>,
     category: Option<String>,
@@ -16,6 +17,15 @@ struct FetchQuery {
     offset: Option<i64>,
 }
 
+/// Fetch permissions
+#[utoipa::path(
+    get,
+    path = "/permissions",
+    params(FetchQuery),
+    responses(
+        (status = 200, body = Vec<Permission>)
+    )
+)]
 async fn fetch(
     State(db): RouteState,
     Query(query): Query<FetchQuery>,
@@ -54,6 +64,12 @@ async fn fetch(
     Ok(Json(records))
 }
 
+/// Create permissions
+#[utoipa::path(
+    post,
+    path = "/permissions",
+    request_body = Permission
+)]
 async fn change_perms(
     method: Method,
     State(db): RouteState,
@@ -109,6 +125,17 @@ async fn change_perms(
     }
 
     Ok(())
+}
+
+pub fn openapi() -> OpenApi {
+    #[derive(utoipa::OpenApi)]
+    #[openapi(
+        paths(super::perms::fetch, super::perms::change_perms,),
+        components(schemas(Permission))
+    )]
+    struct ApiDoc;
+
+    <ApiDoc as utoipa::OpenApi>::openapi()
 }
 
 pub fn router() -> Router<PgPool> {
