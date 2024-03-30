@@ -1,5 +1,7 @@
 FROM rust:1.77-alpine AS build
 
+RUN apk add libc-dev
+
 WORKDIR /app
 
 COPY ./Cargo.toml ./Cargo.lock ./

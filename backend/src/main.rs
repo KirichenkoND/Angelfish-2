@@ -4,6 +4,7 @@ use sqlx::PgPool;
 use tokio::net::TcpListener;
 use tracing::{debug, info, Level};
 use tracing_subscriber::EnvFilter;
+use utoipa_swagger_ui::SwaggerUi;
 
 mod error;
 mod models;
@@ -30,6 +31,9 @@ async fn main() -> Result<(), error::Error> {
     debug!("Migrating database schema");
     sqlx::migrate!("./migrations").run(&db).await?;
 
+    let openapi = routes::categories::openapi();
+    let swagger = SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", openapi);
+
     let app = Router::new()
         .nest("/categories", routes::categories::router())
         .nest("/roles", routes::roles::router())
@@ -37,6 +41,7 @@ async fn main() -> Result<(), error::Error> {
         .nest("/rooms", routes::rooms::router())
         .nest("/permissions", routes::perms::router())
         .nest("/logs", routes::logs::router())
+        .merge(swagger)
         .with_state(db);
 
     let listener = TcpListener::bind("0.0.0.0:8080").await?;

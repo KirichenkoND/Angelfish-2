@@ -7,12 +7,15 @@ use axum::{
 };
 use serde::Deserialize;
 use sqlx::PgPool;
+use utoipa::{openapi::OpenApi, IntoParams};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, IntoParams)]
 struct FetchQuery {
     name: Option<String>,
 }
 
+/// Fetch room categories
+#[utoipa::path(get, path = "/categories", params(FetchQuery))]
 async fn fetch(
     State(db): RouteState,
     Query(query): Query<FetchQuery>,
@@ -34,6 +37,8 @@ async fn fetch(
     Ok(Json(results))
 }
 
+/// Create new category
+#[utoipa::path(post, path = "/categories/:category", params(("category" = String, Path, description = "New category name")))]
 async fn create(Path(category): Path<String>, State(db): RouteState) -> RouteResult<()> {
     let result = sqlx::query!("INSERT INTO Category(category) VALUES($1)", category)
         .execute(&db)
@@ -49,6 +54,8 @@ async fn create(Path(category): Path<String>, State(db): RouteState) -> RouteRes
     Ok(())
 }
 
+/// Delete category
+#[utoipa::path(delete, path = "/categories/:category", params(("category" = String, Path, description = "Category to delete")))]
 async fn remove(Path(category): Path<String>, State(db): RouteState) -> RouteResult<StatusCode> {
     let result = sqlx::query!("DELETE FROM Category WHERE category = $1", category)
         .execute(&db)
@@ -58,6 +65,14 @@ async fn remove(Path(category): Path<String>, State(db): RouteState) -> RouteRes
     }
 
     Ok(StatusCode::OK)
+}
+
+pub fn openapi() -> OpenApi {
+    #[derive(utoipa::OpenApi)]
+    #[openapi(paths(fetch, create))]
+    struct ApiDoc;
+
+    <ApiDoc as utoipa::OpenApi>::openapi()
 }
 
 pub fn router() -> Router<PgPool> {
