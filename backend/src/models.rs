@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use time::OffsetDateTime;
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 #[derive(Debug, FromRow, Serialize, Deserialize)]
@@ -27,7 +28,7 @@ pub struct Room {
     pub name: Option<String>,
 }
 
-#[derive(Debug, FromRow, Serialize, Deserialize)]
+#[derive(Debug, FromRow, ToSchema, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Person {
     #[serde(skip_serializing_if = "Option::is_none")]

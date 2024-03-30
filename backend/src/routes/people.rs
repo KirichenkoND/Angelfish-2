@@ -7,15 +7,25 @@ use axum::{
 };
 use serde::Deserialize;
 use sqlx::{error::ErrorKind, PgPool};
+use utoipa::{openapi::OpenApi, IntoParams};
 use uuid::Uuid;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, IntoParams)]
 struct FetchQuery {
     name: Option<String>,
     uuid: Option<Uuid>,
     banned: Option<bool>,
 }
 
+/// Fetch people
+#[utoipa::path(
+    get,
+    path = "/people",
+    params(FetchQuery),
+    responses(
+        (status = 200, body = Vec<Person>)
+    )
+)]
 async fn fetch(
     State(db): RouteState,
     Query(query): Query<FetchQuery>,
@@ -36,22 +46,21 @@ async fn fetch(
     Ok(Json(results))
 }
 
-#[derive(Deserialize)]
-struct CreateData {
-    uuid: Option<Uuid>,
-    first_name: String,
-    last_name: String,
-    middle_name: Option<String>,
-    role: Option<String>,
-}
-
-async fn create(State(db): RouteState, Json(data): Json<CreateData>) -> RouteResult {
-    let CreateData {
+/// Create new person record
+/// Only `uuid`, `first_name`, `last_name`, `middle_name`, `role` fields are used.
+#[utoipa::path(
+    post,
+    path = "/people",
+    request_body = Person,
+)]
+async fn create(State(db): RouteState, Json(data): Json<Person>) -> RouteResult {
+    let Person {
         uuid,
         first_name,
         last_name,
         middle_name,
         role,
+        ..
     } = data;
 
     let result = sqlx::query!(
@@ -82,6 +91,15 @@ async fn create(State(db): RouteState, Json(data): Json<CreateData>) -> RouteRes
     Ok(())
 }
 
+/// Edits person record
+#[utoipa::path(
+    put,
+    path = "/people/:uuid",
+    params(
+        ("uuid" = Uuid, Path, description = "Uuid of the person to edit")
+    ),
+    request_body = Person,
+)]
 async fn change(
     State(db): RouteState,
     Path(uuid): Path<Uuid>,
@@ -125,6 +143,14 @@ async fn change(
     Ok(())
 }
 
+/// Deletes person record
+#[utoipa::path(
+    delete,
+    path = "/people/:uuid",
+    params(
+        ("uuid" = Uuid, Path, description = "Uuid of the person to delete")
+    ),
+)]
 async fn remove(State(db): RouteState, Path(uuid): Path<Uuid>) -> RouteResult {
     let result = sqlx::query!("DELETE FROM Person WHERE uuid = $1", uuid)
         .execute(&db)
@@ -135,6 +161,22 @@ async fn remove(State(db): RouteState, Path(uuid): Path<Uuid>) -> RouteResult {
     } else {
         Ok(())
     }
+}
+
+pub fn openapi() -> OpenApi {
+    #[derive(utoipa::OpenApi)]
+    #[openapi(
+        paths(
+            super::people::fetch,
+            super::people::create,
+            super::people::change,
+            super::people::remove
+        ),
+        components(schemas(Person))
+    )]
+    struct ApiDoc;
+
+    <ApiDoc as utoipa::OpenApi>::openapi()
 }
 
 pub fn router() -> Router<PgPool> {

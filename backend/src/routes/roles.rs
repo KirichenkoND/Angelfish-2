@@ -69,7 +69,7 @@ async fn remove(Path(category): Path<String>, State(db): RouteState) -> RouteRes
 
 pub fn openapi() -> OpenApi {
     #[derive(utoipa::OpenApi)]
-    #[openapi(paths(fetch, create, remove))]
+    #[openapi(paths(super::roles::fetch, super::roles::create, super::roles::remove))]
     struct ApiDoc;
 
     <ApiDoc as utoipa::OpenApi>::openapi()
