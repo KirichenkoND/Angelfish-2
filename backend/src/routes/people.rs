@@ -63,7 +63,7 @@ async fn create(State(db): RouteState, Json(data): Json<Person>) -> RouteResult 
         ..
     } = data;
 
-    let result = sqlx::query!(
+    sqlx::query!(
         r#"
         INSERT INTO Person(uuid, first_name, last_name, middle_name, role_id) VALUES(
             coalesce($1, gen_random_uuid()),
@@ -78,15 +78,7 @@ async fn create(State(db): RouteState, Json(data): Json<Person>) -> RouteResult 
         role,
     )
     .execute(&db)
-    .await;
-
-    match result {
-        Err(sqlx::Error::Database(err)) if err.kind() == ErrorKind::UniqueViolation => {
-            dbg!(err.constraint());
-        }
-        Err(err) => return Err(err.into()),
-        _ => {}
-    }
+    .await?;
 
     Ok(())
 }

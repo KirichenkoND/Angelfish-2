@@ -38,6 +38,7 @@ pub struct Person {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub middle_name: Option<String>,
     pub role: String,
+    #[serde(default)]
     pub banned: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ban_reason: Option<String>,
