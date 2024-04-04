@@ -26,27 +26,29 @@ const MapBuilding: React.FC = () => {
     const floors = [...new Set(mockData.map(item => item.floor))];
 
     return (
-        <div className="map-building">
-            <div className="floor-switcher">
-                {floors.map(floor => (
-                    <button
-                        key={floor}
-                        className={`floor-button ${currentFloor === floor ? 'active' : ''}`}
-                        onClick={() => setCurrentFloor(floor)}
-                    >
-                        {floor} этаж
-                    </button>
-                ))}
+        <>
+            <div className="map-building">
+                <div className="floor-switcher">
+                    {floors.map(floor => (
+                        <button
+                            key={floor}
+                            className={`floor-button ${currentFloor === floor ? 'active' : ''}`}
+                            onClick={() => setCurrentFloor(floor)}
+                        >
+                            {floor} этаж
+                        </button>
+                    ))}
+                </div>
+                <div className="map">
+                    {filteredData.map((room, index) => (
+                        <div key={room.name + index} className={`room ${index % 2 === 0 ? 'even' : 'odd'}`}>
+                            <span className="room-name">{room.name}</span>
+                            <span className="room-category">{room.category}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
-            <div className="map">
-                {filteredData.map((room, index) => (
-                    <div key={room.name + index} className={`room ${index % 2 === 0 ? 'even' : 'odd'}`}>
-                        <span className="room-name">{room.name}</span>
-                        <span className="room-category">{room.category}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
+        </>
     );
 };
 
