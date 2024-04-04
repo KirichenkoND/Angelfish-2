@@ -1,9 +1,10 @@
 import React from 'react';
+import Input from '../Input/Input';
 
 const SearchBar: React.FC = () => {
     return (
         <>
-            ПОИСКОВАЯ СТРОКА
+            Поиск <Input />
         </>
     );
 };

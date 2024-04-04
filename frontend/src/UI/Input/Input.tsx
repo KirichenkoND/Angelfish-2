@@ -11,7 +11,7 @@ interface InputProps {
     value: string;
 }
 
-const Input: React.FC<InputProps> = ({type = "text", styleName = "default_input", value, onChange, ...OtherFields}) => {
+const Input: React.FC<InputProps> = ({ type = "text", styleName = "default_input", value, onChange, ...OtherFields }) => {
     const [showPassword, setShowPassword] = useState(false);
 
     const togglePasswordVisibility = () => {
@@ -19,14 +19,16 @@ const Input: React.FC<InputProps> = ({type = "text", styleName = "default_input"
     };
 
     return (
-        <div className="input-wrapper">
-            <input type={showPassword ? "text" : type} value={value} className={styleName} onChange={onChange} {...OtherFields}/>
-            {type === "password" && (
-                <button className="password-toggle" onClick={togglePasswordVisibility}>
-                    {showPassword ? <img src={logo_closed_eye} alt="" /> : <img src={logo_eye} alt="" /> }
-                </button>
-            )}
-        </div>
+        <>
+            <div className="input-wrapper">
+                <input type={showPassword ? "text" : type} value={value} className={styleName} onChange={onChange} {...OtherFields} />
+                {type === "password" && (
+                    <button className="password-toggle" onClick={togglePasswordVisibility}>
+                        {showPassword ? <img src={logo_closed_eye} alt="" /> : <img src={logo_eye} alt="" />}
+                    </button>
+                )}
+            </div>
+        </>
     );
 };
 
