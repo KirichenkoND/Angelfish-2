@@ -15,6 +15,7 @@ import UsersPage from './pages/UsersPage/UsersPage.tsx';
 import SearchPage from './pages/SearchPage/SearchPage.tsx';
 import AccessEditorPage from './pages/AccessEditorPage/AccessEditorPage.tsx';
 import MapPage from './pages/MapPage/MapPage.tsx';
+import SettingsPage from './pages/SettingsPage/SettingsPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: '/maps',
         element: <MapPage />
+      },
+      {
+        path: '/settings',
+        element: <SettingsPage />
       },
       {
         path: '*',
