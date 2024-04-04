@@ -14,6 +14,7 @@ import AccessLogPage from './pages/AccessLogPage/AccessLogPage.tsx';
 import UsersPage from './pages/UsersPage/UsersPage.tsx';
 import SearchPage from './pages/SearchPage/SearchPage.tsx';
 import AccessEditorPage from './pages/AccessEditorPage/AccessEditorPage.tsx';
+import MapPage from './pages/MapPage/MapPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
       {
         path: '/accesseditor',
         element: <AccessEditorPage />
+      },
+      {
+        path: '/maps',
+        element: <MapPage />
       },
       {
         path: '*',

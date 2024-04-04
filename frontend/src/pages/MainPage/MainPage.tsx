@@ -12,8 +12,8 @@ import test_6 from "../../assets/software_po.svg";
 const NavigationCardList = [
     {
         imageUrl: test_1,
-        title: "Загрузка...",
-        link: "/idk",
+        title: "Карта",
+        link: "/maps",
     },
     {
         imageUrl: test_2,

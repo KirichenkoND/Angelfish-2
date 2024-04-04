@@ -1,0 +1,72 @@
+.map-building {
+    .floor-switcher {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+
+        .floor-button {
+            background-color: #f0f0f0;
+            border: 2px solid transparent;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+
+            &.active {
+                border-color: #333;
+            }
+
+            &:hover {
+                background-color: #e0e0e0;
+            }
+        }
+    }
+
+    .map {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+        padding: 20px;
+        background-color: #fff;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+
+        .room {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #ccc;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            transition: transform 0.3s;
+
+            &:hover {
+                transform: translateY(-5px);
+            }
+
+            & {
+                border-color: gray;
+            }
+
+            // &.even {
+            //     border-color: #c4e0e5;
+            // }
+
+            // &.odd {
+            //     border-color: #e5c4c4;
+            // }
+
+            .room-name {
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            .room-category {
+                font-size: 0.85rem;
+                color: #555;
+            }
+        }
+    }
+}
