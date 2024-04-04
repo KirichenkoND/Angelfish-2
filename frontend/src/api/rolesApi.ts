@@ -15,9 +15,9 @@ export const rolesApi = createApi({
       query: (name) => ({ url: `roles/${name}`, method: 'POST' }),
     }),
     deleteRole: builder.mutation<string, TRoles>({
-        query: (name) => ({ url: `roles/${name}`, method: 'DELETE' }),
-      }),
+      query: (name) => ({ url: `roles/${name}`, method: 'DELETE' }),
+    }),
   }),
 })
 
-export const { useGetRolesQuery, usePostRoleMutation, useDeleteRoleMutation} = rolesApi;
+export const { useGetRolesQuery, usePostRoleMutation, useDeleteRoleMutation } = rolesApi;

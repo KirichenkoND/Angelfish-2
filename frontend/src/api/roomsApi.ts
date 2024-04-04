@@ -20,7 +20,7 @@ export const roomsApi = createApi({
         postRoom: builder.mutation<string, IRoom>({
             query: (body) => ({ url: `rooms`, method: 'POST', body }),
         }),
-        postToggleRoom: builder.mutation<string, {room_id: number, direction: string, uuid: string}>({
+        postToggleRoom: builder.mutation<string, { room_id: number, direction: string, uuid: string }>({
             query: (args) => ({ url: `rooms/${args.room_id}/${args.direction}/${args.uuid}`, method: 'POST' }),
         }),
         deleteRooms: builder.mutation<string, string>({

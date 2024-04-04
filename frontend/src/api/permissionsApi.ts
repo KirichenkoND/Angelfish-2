@@ -1,10 +1,10 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 interface IPermissions {
-    category: string;
-    person_uuid: string;
-    role: string;
-    room_id: number;
+  category: string;
+  person_uuid: string;
+  role: string;
+  room_id: number;
 };
 
 type TPermissions = IPermissions[];
