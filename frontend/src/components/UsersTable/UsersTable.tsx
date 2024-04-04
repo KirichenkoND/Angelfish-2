@@ -5,33 +5,9 @@ import edit_button from "../../assets/edit_button.svg";
 import delete_button from "../../assets/delete_button.svg";
 
 const initialData = [
-  {
-    ID: 111,
-    Lastname: "Иванов",
-    Firstname: "Иван",
-    Middlename: "Иванович",
-    Date_Birth: "01.01.2002",
-    Active: true,
-    CategoryID: 0,
-  },
-  {
-    ID: 222,
-    Lastname: "Петров",
-    Firstname: "Петр",
-    Middlename: "Петрович",
-    Date_Birth: "02.02.2003",
-    Active: false,
-    CategoryID: 1,
-  },
-  {
-    ID: 333,
-    Lastname: "Пиванов",
-    Firstname: "Пиван",
-    Middlename: "Петрович",
-    Date_Birth: "02.02.2003",
-    Active: false,
-    CategoryID: 2,
-  },
+  { uuid: "1a2b3c", first_name: "Иван", last_name: "Иванов", middle_name: "Иванович", role_id: 1, banned: false, ban_reason: "" },
+  { uuid: "4d5e6f", first_name: "Петр", last_name: "Петров", middle_name: "Петрович", role_id: 2, banned: true, ban_reason: "Так захотел Главный админ" },
+  { uuid: "7g8h9i", first_name: "Павел", last_name: "Павлов", middle_name: "Павлович", role_id: 3, banned: false, ban_reason: "" },
 ];
 
 const sortData = (data, column, direction) => {
@@ -57,13 +33,13 @@ const UsersTable = () => {
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [filters, setFilters] = useState({
-    ID: "",
-    Lastname: "",
-    Firstname: "",
-    Middlename: "",
-    Date_Birth: "",
-    Active: "",
-    CategoryID: "",
+    uuid: "",
+    first_name: "",
+    last_name: "",
+    middle_name: "",
+    role_id: "",
+    banned: "",
+    ban_reason: "",
   });
 
   const handleSort = (column) => {
@@ -78,6 +54,7 @@ const UsersTable = () => {
   };
 
   const filteredData = filterData(data, filters);
+
   return (
     <>
       <SearchBar />
@@ -85,27 +62,23 @@ const UsersTable = () => {
         <thead>
           <tr>
             {[
-              "ID",
-              "Lastname",
-              "Firstname",
-              "Middlename",
-              "Date_Birth",
-              "Active",
-              "CategoryID",
+              "uuid",
+              "first_name",
+              "last_name",
+              "middle_name",
+              "role_id",
+              "banned",
+              "ban_reason",
             ].map((column) => (
               <th key={column} onClick={() => handleSort(column)}>
-                <span>{column}</span>
+                <span>{column.replace(/_/g, ' ')}</span>
                 <input
                   type="text"
                   value={filters[column]}
                   onChange={(e) => updateFilter(column, e.target.value)}
                   onClick={(e) => e.stopPropagation()}
-                  placeholder={`Filter ${column}`}
-                  style={{
-                    marginLeft: "10px",
-                    padding: "2px",
-                    fontSize: "small",
-                  }}
+                  placeholder={`Filter ${column.replace(/_/g, ' ')}`}
+                  style={{ marginLeft: "10px", padding: "2px", fontSize: "small" }}
                 />
               </th>
             ))}
@@ -113,8 +86,8 @@ const UsersTable = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredData.map((user) => (
-            <UserRow user={user} />
+          {filteredData.map((user, index) => (
+            <UserRow key={index} user={user} />
           ))}
         </tbody>
       </table>
@@ -123,127 +96,41 @@ const UsersTable = () => {
 };
 
 const UserRow = ({ user }) => {
-  const [active, setActive] = useState(user.Active);
+  const [banned, setBanned] = useState(user.banned);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedUser, setEditedUser] = useState({
-    Lastname: user.Lastname,
-    Firstname: user.Firstname,
-    Middlename: user.Middlename,
-    Date_Birth: user.Date_Birth,
-    CategoryID: user.CategoryID,
-  });
+  const [editedUser, setEditedUser] = useState(user);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditedUser({
-      ...editedUser,
-      [name]: value,
-    });
+    setEditedUser({ ...editedUser, [name]: value });
   };
 
-  const handleEditClick = () => {
-    setIsEditing(true);
-  };
-
-  const handleSaveClick = () => {
-    setIsEditing(false);
-  };
-
+  const handleEditClick = () => setIsEditing(true);
+  const handleSaveClick = () => setIsEditing(false);
   const handleCancelClick = () => {
-    setEditedUser({
-      Lastname: user.Lastname,
-      Firstname: user.Firstname,
-      Middlename: user.Middlename,
-      Date_Birth: user.Date_Birth,
-      CategoryID: user.CategoryID,
-    });
+    setEditedUser(user);
     setIsEditing(false);
   };
 
   return (
-    <tr key={user.ID} className={active ? "" : "failed"}>
-      <td>{user.ID}</td>
-      <td>
-        {isEditing ? (
-          <input
-            type="text"
-            name="Lastname"
-            value={editedUser.Lastname}
-            onChange={handleInputChange}
-          />
-        ) : (
-          editedUser.Lastname
-        )}
-      </td>
-      <td>
-        {isEditing ? (
-          <input
-            type="text"
-            name="Firstname"
-            value={editedUser.Firstname}
-            onChange={handleInputChange}
-          />
-        ) : (
-          editedUser.Firstname
-        )}
-      </td>
-      <td>
-        {isEditing ? (
-          <input
-            type="text"
-            name="Middlename"
-            value={editedUser.Middlename}
-            onChange={handleInputChange}
-          />
-        ) : (
-          editedUser.Middlename
-        )}
-      </td>
-      <td>
-        {isEditing ? (
-          <input
-            type="text"
-            name="Date_Birth"
-            value={editedUser.Date_Birth}
-            onChange={handleInputChange}
-          />
-        ) : (
-          editedUser.Date_Birth
-        )}
-      </td>
-      <td>{active ? "Да" : "Нет"}</td>
-      <td>
-        {isEditing ? (
-          <input
-            type="text"
-            name="CategoryID"
-            value={editedUser.CategoryID}
-            onChange={handleInputChange}
-          />
-        ) : (
-          editedUser.CategoryID
-        )}
-      </td>
+    <tr className={banned ? "failed" : ""}>
+      <td>{user.uuid}</td>
+      <td>{isEditing ? <input type="text" name="first_name" value={editedUser.first_name} onChange={handleInputChange} /> : editedUser.first_name}</td>
+      <td>{isEditing ? <input type="text" name="last_name" value={editedUser.last_name} onChange={handleInputChange} /> : editedUser.last_name}</td>
+      <td>{isEditing ? <input type="text" name="middle_name" value={editedUser.middle_name} onChange={handleInputChange} /> : editedUser.middle_name}</td>
+      <td>{isEditing ? <input type="text" name="role_id" value={editedUser.role_id} onChange={handleInputChange} /> : editedUser.role_id}</td>
+      <td>{banned ? "Yes" : "No"}</td>
+      <td>{isEditing ? <input type="text" name="ban_reason" value={editedUser.ban_reason} onChange={handleInputChange} /> : editedUser.ban_reason}</td>
       <td>
         {isEditing ? (
           <>
-            <button onClick={handleSaveClick}>Сохранить</button>
-            <button onClick={handleCancelClick}>Отмена</button>
+            <button onClick={handleSaveClick}>Save</button>
+            <button onClick={handleCancelClick}>Cancel</button>
           </>
         ) : (
           <a href="#">
-            <img
-              src={edit_button}
-              alt="Edit"
-              style={{ width: "20px", height: "20px" }}
-              onClick={handleEditClick}
-            />
-            <img
-              src={delete_button}
-              alt="Delete"
-              style={{ width: "20px", height: "20px" }}
-              onClick={() => setActive(!active)}
-            />
+            <img src={edit_button} alt="Edit" style={{ width: "20px", height: "20px" }} onClick={handleEditClick} />
+            <img src={delete_button} alt="Delete" style={{ width: "20px", height: "20px" }} onClick={() => setBanned(!banned)} />
           </a>
         )}
       </td>

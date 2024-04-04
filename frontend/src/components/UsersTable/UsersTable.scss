@@ -1,19 +1,19 @@
 .UsersTable {
     border-collapse: collapse;
-    width: 100%;
     margin-top: 5%;
+    width: auto;
 
     th {
         background-color: #f2f2f2;
         color: #333;
         font-weight: bold;
-        padding: 8px;
+        padding: 6px;
         text-align: center;
         border-bottom: 1px solid #ddd;
     }
 
     td {
-        padding: 8px;
+        padding: 6px;
         border-bottom: 1px solid #ddd;
     }
 
