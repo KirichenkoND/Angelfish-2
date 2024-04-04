@@ -21,6 +21,9 @@ export const permissionsApi = createApi({
     postPermissions: builder.mutation<string, IPermissions>({
       query: () => ({ url: `permissions`, method: 'POST' }),
     }),
+    deletePermissions: builder.mutation<string, TPermissions>({
+      query: (name) => ({ url: `Permissions/${name}`, method: 'DELETE' }),
+    }),
   }),
 })
 
