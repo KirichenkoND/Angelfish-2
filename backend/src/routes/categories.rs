@@ -40,7 +40,7 @@ async fn fetch(
 }
 
 /// Create new category
-#[utoipa::path(post, path = "/categories/:category", params(("category" = String, Path, description = "New category name")))]
+#[utoipa::path(post, path = "/categories/{category}", params(("category" = String, Path, description = "New category name")))]
 async fn create(Path(category): Path<String>, State(db): RouteState) -> RouteResult {
     let result = sqlx::query!("INSERT INTO Category(category) VALUES($1)", category)
         .execute(&db)
@@ -57,7 +57,7 @@ async fn create(Path(category): Path<String>, State(db): RouteState) -> RouteRes
 }
 
 /// Delete category
-#[utoipa::path(delete, path = "/categories/:category", params(("category" = String, Path, description = "Category to delete")))]
+#[utoipa::path(delete, path = "/categories/{category}", params(("category" = String, Path, description = "Category to delete")))]
 async fn remove(Path(category): Path<String>, State(db): RouteState) -> RouteResult<StatusCode> {
     let result = sqlx::query!("DELETE FROM Category WHERE category = $1", category)
         .execute(&db)

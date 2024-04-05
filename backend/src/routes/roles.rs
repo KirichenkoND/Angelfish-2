@@ -38,7 +38,7 @@ async fn fetch(
 }
 
 /// Create new user role
-#[utoipa::path(post, path = "/roles/:role", params(("role" = String, Path, description = "New user role name")))]
+#[utoipa::path(post, path = "/roles/{role}", params(("role" = String, Path, description = "New user role name")))]
 async fn create(Path(role): Path<String>, State(db): RouteState) -> RouteResult<()> {
     let result = sqlx::query!("INSERT INTO Role(role) VALUES($1)", role)
         .execute(&db)
@@ -55,7 +55,7 @@ async fn create(Path(role): Path<String>, State(db): RouteState) -> RouteResult<
 }
 
 /// Delete user role
-#[utoipa::path(delete, path = "/roles/:role", params(("role" = String, Path, description = "User role name")))]
+#[utoipa::path(delete, path = "/roles/{role}", params(("role" = String, Path, description = "User role name")))]
 async fn remove(Path(category): Path<String>, State(db): RouteState) -> RouteResult<StatusCode> {
     let result = sqlx::query!("DELETE FROM Role WHERE role = $1", category)
         .execute(&db)

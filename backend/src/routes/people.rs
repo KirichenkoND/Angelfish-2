@@ -6,7 +6,7 @@ use axum::{
     routing::*,
 };
 use serde::Deserialize;
-use sqlx::{error::ErrorKind, PgPool};
+use sqlx::PgPool;
 use utoipa::{openapi::OpenApi, IntoParams};
 use uuid::Uuid;
 
@@ -86,7 +86,7 @@ async fn create(State(db): RouteState, Json(data): Json<Person>) -> RouteResult 
 /// Edits person record
 #[utoipa::path(
     put,
-    path = "/people/:uuid",
+    path = "/people/{uuid}",
     params(
         ("uuid" = Uuid, Path, description = "Uuid of the person to edit")
     ),
@@ -138,7 +138,7 @@ async fn change(
 /// Deletes person record
 #[utoipa::path(
     delete,
-    path = "/people/:uuid",
+    path = "/people/{uuid}",
     params(
         ("uuid" = Uuid, Path, description = "Uuid of the person to delete")
     ),
