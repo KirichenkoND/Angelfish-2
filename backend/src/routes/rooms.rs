@@ -13,6 +13,7 @@ use uuid::Uuid;
 
 #[derive(Deserialize, IntoParams)]
 struct Fetch {
+    id: Option<i32>,
     floor: Option<i32>,
     category: Option<String>,
     name: Option<String>,
@@ -31,6 +32,7 @@ struct Fetch {
 )]
 async fn fetch(State(db): RouteState, Query(query): Query<Fetch>) -> RouteResult<Json<Vec<Room>>> {
     let Fetch {
+        id,
         floor,
         name,
         count,
@@ -52,7 +54,8 @@ async fn fetch(State(db): RouteState, Query(query): Query<Fetch>) -> RouteResult
         WHERE
             coalesce(lower(room) LIKE ('%' || lower($3) || '%'), true) AND
             coalesce(floor = $4, true) AND
-            (category = any($5) OR cardinality($5) = 0)
+            (category = any($5) OR cardinality($5) = 0) AND
+            (Room.id = $6 OR $6 IS NULL)
         LIMIT $1 OFFSET $2
     "#,
     )
@@ -61,6 +64,7 @@ async fn fetch(State(db): RouteState, Query(query): Query<Fetch>) -> RouteResult
     .bind(name)
     .bind(floor)
     .bind(categories)
+    .bind(id)
     .fetch_all(&db)
     .await?;
 
