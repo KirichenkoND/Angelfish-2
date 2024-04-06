@@ -1,0 +1,25 @@
+.default_input {
+    padding: 5px 15px;
+    border: 2px solid #8a8a8a;
+    border-radius: 5px;
+    color: #8a8a8a;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.auth_input {
+    width: calc(100% - 30px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+}
+
+.auth_input:focus {
+    border-color: #007bff;
+}
+
+.password-toggle {
+    border-radius: 20px;
+    border: solid 2px black;
+    margin-left: 10px;
+}

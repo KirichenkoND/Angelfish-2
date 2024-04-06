@@ -1,0 +1,15 @@
+.header-links {
+    display: inline-flex;
+    margin-left: 10vw;
+    gap: 30px;
+}
+
+.header {
+    position: sticky;
+    display: flex;
+    min-height: 80px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(56, 23, 202);
+    border-radius: 0 0 30% 30%;
+}

@@ -1,0 +1,35 @@
+.uk-card {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s;
+}
+
+.uk-card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.uk-card-media-top img {
+    max-width: 100%;
+    height: auto;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.uk-card-body {
+    padding: 16px;
+}
+
+.uk-card-title {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+}
+
+.uk-button {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.uk-button:hover {
+    text-decoration: underline;
+}

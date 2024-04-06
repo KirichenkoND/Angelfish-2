@@ -1,0 +1,59 @@
+// Стандартный стиль кнопки
+.default_btn {
+    align-items: center;
+    justify-content: center;
+
+    margin: 5px 5px 5px 5px;
+
+    font-size: 16px;
+    padding: 5px 15px;
+    border: 2px solid #8a8a8a;
+    border-radius: 5px;
+    color: #8a8a8a;
+    background-color: #fff;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.default_btn:hover {
+    background-color: #8a8a8a;
+    color: #fff;
+}
+
+// Красная кнопка
+.red_btn {
+    align-items: center;
+    justify-content: center;
+
+    margin: 5px 5px 5px 5px;
+
+    font-size: 16px;
+    padding: 5px 15px;
+    border: 2px solid #ff7070;
+    border-radius: 5px;
+    color: #ff7070;
+    background-color: #fff;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.red_btn:hover {
+    background-color: #ff7070;
+    color: #fff;
+}
+
+// Кнопка для авторизации
+.auth_btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.auth_btn:hover {
+    background-color: #0056b3;
+}
