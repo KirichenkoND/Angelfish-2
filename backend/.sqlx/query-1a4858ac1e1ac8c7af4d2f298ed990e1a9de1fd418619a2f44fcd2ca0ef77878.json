@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO Person(uuid, first_name, last_name, middle_name, role_id) VALUES(\n            coalesce($1, gen_random_uuid()),\n            $2, $3, $4,\n            coalesce((SELECT id FROM Role WHERE role = $5), 0)\n        )\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1a4858ac1e1ac8c7af4d2f298ed990e1a9de1fd418619a2f44fcd2ca0ef77878"
+}
