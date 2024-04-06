@@ -2,6 +2,7 @@ use axum::Router;
 use dotenvy::var;
 use sqlx::PgPool;
 use tokio::net::TcpListener;
+use tower_sessions_sqlx_store::PostgresStore;
 use tracing::{debug, info, Level};
 use tracing_subscriber::EnvFilter;
 use utoipa_swagger_ui::SwaggerUi;
@@ -38,6 +39,10 @@ async fn main() -> Result<(), error::Error> {
     openapi.merge(routes::perms::openapi());
     openapi.merge(routes::logs::openapi());
 
+    let session_store = PostgresStore::new(db.clone());
+    session_store.migrate().await?;
+
+    let session_layer = tower_sessions::SessionManagerLayer::new(session_store);
     let swagger = SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", openapi);
 
     let app = Router::new()
@@ -47,6 +52,7 @@ async fn main() -> Result<(), error::Error> {
         .nest("/rooms", routes::rooms::router())
         .nest("/permissions", routes::perms::router())
         .nest("/logs", routes::logs::router())
+        .layer(session_layer)
         .merge(swagger)
         .with_state(db);
 

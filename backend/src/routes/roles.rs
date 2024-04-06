@@ -1,13 +1,62 @@
 use super::{Json, Query, RouteResult, RouteState};
 use anyhow::anyhow;
+use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     routing::*,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use utoipa::{openapi::OpenApi, IntoParams};
+use time::{Duration, OffsetDateTime};
+use tower_sessions::{Expiry, Session};
+use utoipa::{openapi::OpenApi, IntoParams, ToSchema};
+
+#[derive(Serialize, ToSchema)]
+struct Me {
+    role: String,
+}
+
+#[utoipa::path(get, path = "/roles/me")]
+async fn me(session: Session) -> RouteResult<Json<Me>> {
+    let role: String = session.get("role").await?.ok_or(anyhow!("Unauthorized"))?;
+    Ok(Json(Me { role }))
+}
+
+#[derive(Deserialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+struct Login {
+    password: String,
+}
+
+#[utoipa::path(post, path = "/roles/{role}/login", request_body = LoginReques, responses((status = 200)))]
+async fn login(
+    session: Session,
+    Path(role): Path<String>,
+    State(db): RouteState,
+    Json(data): Json<Login>,
+) -> RouteResult {
+    let Login { password } = data;
+
+    let password_hash: String =
+        sqlx::query!("SELECT password_hash FROM Role WHERE role = $1", role)
+            .fetch_optional(&db)
+            .await?
+            .ok_or(anyhow!("Role is not found"))?
+            .password_hash
+            .ok_or(anyhow!("Cannot login into role without password"))?;
+
+    let hash = PasswordHash::try_from(password_hash.as_str()).unwrap();
+    Argon2::default()
+        .verify_password(password.as_bytes(), &hash)
+        .map_err(|_| anyhow!("Invalid password"))?;
+    session.set_expiry(Some(Expiry::AtDateTime(
+        OffsetDateTime::now_utc() + Duration::days(1),
+    )));
+    session.insert("role", role).await?;
+
+    Ok(())
+}
 
 #[derive(Deserialize, IntoParams)]
 struct FetchQuery {
@@ -69,7 +118,16 @@ async fn remove(Path(category): Path<String>, State(db): RouteState) -> RouteRes
 
 pub fn openapi() -> OpenApi {
     #[derive(utoipa::OpenApi)]
-    #[openapi(paths(super::roles::fetch, super::roles::create, super::roles::remove))]
+    #[openapi(
+        paths(
+            super::roles::fetch,
+            super::roles::create,
+            super::roles::me,
+            super::roles::login,
+            super::roles::remove
+        ),
+        components(schemas(super::roles::Me, super::roles::Login))
+    )]
     struct ApiDoc;
 
     <ApiDoc as utoipa::OpenApi>::openapi()
@@ -78,5 +136,7 @@ pub fn openapi() -> OpenApi {
 pub fn router() -> Router<PgPool> {
     Router::new()
         .route("/", get(fetch))
+        .route("/me", get(me))
         .route("/:role", post(create).delete(remove))
+        .route("/:role/login", post(login))
 }
