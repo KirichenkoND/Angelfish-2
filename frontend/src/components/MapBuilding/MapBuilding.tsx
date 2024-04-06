@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import './MapBuilding.scss';
+import { useGetRoomQuery } from "../../api/roomsApi";
 
 const mockData = [
     { category: "Лекционная", floor: 1, name: "101" },
@@ -24,6 +25,15 @@ const MapBuilding: React.FC = () => {
     const [currentFloor, setCurrentFloor] = useState(1);
     const filteredData = mockData.filter(item => item.floor === currentFloor);
     const floors = [...new Set(mockData.map(item => item.floor))];
+    const { data, isLoading, isError, isSuccess } = useGetRoomQuery();
+
+    if (isError) {
+        return <>Ошибка</>;
+    }
+
+    if (isLoading) {
+        return <></>;
+    }
 
     return (
         <>
@@ -40,7 +50,7 @@ const MapBuilding: React.FC = () => {
                     ))}
                 </div>
                 <div className="map">
-                    {filteredData.map((room, index) => (
+                    {isSuccess && data.filter(item => item.floor === currentFloor).map((room, index) => (
                         <div key={room.name + index} className={`room ${index % 2 === 0 ? 'even' : 'odd'}`}>
                             <span className="room-name">{room.name}</span>
                             <span className="room-category">{room.category}</span>
