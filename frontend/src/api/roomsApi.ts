@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 interface IRoom {
+    id: number;
     category: string;
     floor: number;
     name: string;
