@@ -46,6 +46,7 @@ pub struct Person {
 
 #[derive(Debug, FromRow, ToSchema, Serialize)]
 pub struct Log {
+    #[serde(with = "time::serde::rfc3339")]
     pub time: OffsetDateTime,
     pub person_uuid: Uuid,
     pub room_id: i32,
