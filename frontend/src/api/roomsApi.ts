@@ -6,15 +6,15 @@ interface IRoom {
     name: string;
 }
 
-type TRooms = IRoom[];
+export type TRooms = IRoom[];
 
 //TODO: дописать передачу аргументов через вопрос
 
 export const roomsApi = createApi({
     reducerPath: 'roomsApi',
-    baseQuery: fetchBaseQuery({ baseUrl: 'https://api.securitypass.efbo.ru/' }),
+    baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:9119/api/' }),
     endpoints: (builder) => ({
-        getRoom: builder.query<TRooms, string>({
+        getRoom: builder.query<TRooms, void>({
             query: () => `rooms`,
         }),
         postRoom: builder.mutation<string, IRoom>({
@@ -24,7 +24,7 @@ export const roomsApi = createApi({
             query: (args) => ({ url: `rooms/${args.room_id}/${args.direction}/${args.uuid}`, method: 'POST' }),
         }),
         deleteRooms: builder.mutation<string, string>({
-            query: (room_id) => ({ url: `categories/${room_id}`, method: 'DELETE' }),
+            query: (room_id) => ({ url: `rooms/${room_id}`, method: 'DELETE' }),
         }),
     }),
 })

@@ -7,24 +7,24 @@ interface IPermissions {
   room_id: number;
 };
 
-type TPermissions = IPermissions[];
+export type TPermissions = IPermissions[];
 
 //TODO: дописать передачу параметров в get запрос
 
 export const permissionsApi = createApi({
   reducerPath: 'permissionsApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'https://api.securitypass.efbo.ru/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:9119/api/' }),
   endpoints: (builder) => ({
-    getPermissions: builder.query<TPermissions, string>({
+    getPermissions: builder.query<TPermissions, void>({
       query: () => `permissions`,
     }),
     postPermissions: builder.mutation<string, IPermissions>({
       query: () => ({ url: `permissions`, method: 'POST' }),
     }),
-    deletePermissions: builder.mutation<string, TPermissions>({
+    deletePermissions: builder.mutation<string, string>({
       query: (name) => ({ url: `Permissions/${name}`, method: 'DELETE' }),
     }),
   }),
 })
 
-export const { useGetPermissionsQuery, usePostPermissionsMutation } = permissionsApi;
+export const { useGetPermissionsQuery, usePostPermissionsMutation, useDeletePermissionsMutation } = permissionsApi;

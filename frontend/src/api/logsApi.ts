@@ -12,10 +12,10 @@ type TLogs = ILogs[];
 
 export const logsApi = createApi({
     reducerPath: 'logsApi',
-    baseQuery: fetchBaseQuery({ baseUrl: 'https://api.securitypass.efbo.ru/' }),
+    baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:9119/api/' }),
     endpoints: (builder) => ({
-        getLogs: builder.query<TLogs, string>({
-            query: () => `people`,
+        getLogs: builder.query<TLogs, void>({
+            query: () => `logs`,
         }),
     }),
 })

@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-// import { Provider } from "react-redux";
 
 import './index.css'
 import NotFound from "./components/NotFound/NotFound";
@@ -16,6 +15,8 @@ import SearchPage from './pages/SearchPage/SearchPage.tsx';
 import AccessEditorPage from './pages/AccessEditorPage/AccessEditorPage.tsx';
 import MapPage from './pages/MapPage/MapPage.tsx';
 import SettingsPage from './pages/SettingsPage/SettingsPage.tsx';
+import { Provider } from 'react-redux';
+import { store } from './store/store.ts';
 
 const router = createBrowserRouter([
   {
@@ -64,8 +65,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    {/* <Provider store={store}> */}
+    <Provider store={store}>
     <RouterProvider router={router} />
-    {/* </Provider> */}
+    </Provider>
   </React.StrictMode>,
 )

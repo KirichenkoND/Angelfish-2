@@ -6,9 +6,11 @@ import { permissionsApi } from "./../api/permissionsApi";
 import { rolesApi } from "./../api/rolesApi";
 import { roomsApi } from "./../api/roomsApi";
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import userSlice from './Slices/userSlice';
 
 export const store = configureStore({
     reducer: {
+        user: userSlice,
         [categoriesApi.reducerPath]: categoriesApi.reducer,
         [logsApi.reducerPath]: logsApi.reducer,
         [peopleApi.reducerPath]: peopleApi.reducer,

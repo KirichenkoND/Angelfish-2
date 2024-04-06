@@ -10,15 +10,15 @@ interface IPeople {
     uuid: string;
 };
 
-type TPeople = IPeople[];
+export type TPeople = IPeople[];
 
 //TODO: дописать передачу аргументов через вопрос
 
 export const peopleApi = createApi({
     reducerPath: 'peopleApi',
-    baseQuery: fetchBaseQuery({ baseUrl: 'https://api.securitypass.efbo.ru/' }),
+    baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:9119/api/' }),
     endpoints: (builder) => ({
-        getPeople: builder.query<TPeople, string>({
+        getPeople: builder.query<TPeople, void>({
             query: () => `people`,
         }),
         postPeople: builder.mutation<string, IPeople>({

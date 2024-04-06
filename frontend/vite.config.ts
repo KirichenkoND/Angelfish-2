@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        "target": "http://api.securitypass.efbo.ru",
+        "target": "https://api.securitypass.efbo.ru",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       }
