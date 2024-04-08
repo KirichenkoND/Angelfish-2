@@ -6,7 +6,7 @@ use crate::{
 use anyhow::anyhow;
 use axum::{
     extract::{Path, State},
-    middleware::from_fn,
+    middleware::from_fn_with_state,
     routing::*,
 };
 use serde::Deserialize;
@@ -17,6 +17,7 @@ use uuid::Uuid;
 #[derive(Deserialize, IntoParams)]
 struct FetchQuery {
     name: Option<String>,
+    phone: Option<String>,
     uuid: Option<Uuid>,
     banned: Option<bool>,
 }
@@ -34,7 +35,12 @@ async fn fetch(
     State(db): RouteState,
     Query(query): Query<FetchQuery>,
 ) -> RouteResult<Json<Vec<Person>>> {
-    let FetchQuery { name, uuid, banned } = query;
+    let FetchQuery {
+        name,
+        uuid,
+        banned,
+        phone,
+    } = query;
 
     let results = sqlx::query_as::<_, Person>(
         r#"
@@ -43,9 +49,10 @@ async fn fetch(
             WHERE
                 lower(concat(first_name, last_name, middle_name)) LIKE coalesce('%' || lower($1) || '%', '%') AND
                 coalesce(uuid = $2, true) AND
-                coalesce(banned = $3, true)
+                coalesce(banned = $3, true) AND
+                coalesce(phone LIKE '%' || $4 || '%', true)
         "#,
-    ).bind(name).bind(uuid).bind(banned).fetch_all(&db).await?;
+    ).bind(name).bind(uuid).bind(banned).bind(phone).fetch_all(&db).await?;
 
     Ok(Json(results))
 }
@@ -64,15 +71,17 @@ async fn create(State(db): RouteState, Json(data): Json<Person>) -> RouteResult 
         last_name,
         middle_name,
         role,
+        phone,
         ..
     } = data;
 
     sqlx::query!(
         r#"
-        INSERT INTO Person(uuid, first_name, last_name, middle_name, role_id) VALUES(
+        INSERT INTO Person(uuid, first_name, last_name, middle_name, role_id, phone) VALUES(
             coalesce($1, gen_random_uuid()),
             $2, $3, $4,
-            coalesce((SELECT id FROM Role WHERE role = $5), 0)
+            coalesce((SELECT id FROM Role WHERE role = $5), 0),
+            $6
         )
     "#,
         uuid,
@@ -80,6 +89,7 @@ async fn create(State(db): RouteState, Json(data): Json<Person>) -> RouteResult 
         last_name,
         middle_name,
         role,
+        phone
     )
     .execute(&db)
     .await?;
@@ -109,6 +119,7 @@ async fn change(
         role,
         banned,
         ban_reason,
+        phone,
     } = data;
 
     sqlx::query!(
@@ -120,7 +131,8 @@ async fn change(
             middle_name = $4,
             role_id = (SELECT id FROM Role WHERE role = $5),
             banned = $6,
-            ban_reason = $7
+            ban_reason = $7,
+            phone = $9
         WHERE
             uuid = $8
     "#,
@@ -131,7 +143,8 @@ async fn change(
         role,
         banned,
         ban_reason,
-        uuid
+        uuid,
+        phone
     )
     .execute(&db)
     .await?;
@@ -175,9 +188,20 @@ pub fn openapi() -> OpenApi {
     <ApiDoc as utoipa::OpenApi>::openapi()
 }
 
-pub fn router() -> Router<PgPool> {
+pub fn router(db: &PgPool) -> Router<PgPool> {
     Router::new()
-        .route("/", get(fetch).layer(from_fn(protect_guard)))
-        .route("/", post(create).layer(from_fn(protect_admin)))
-        .route("/:uuid", put(change).delete(remove))
+        .route(
+            "/",
+            get(fetch).layer(from_fn_with_state(db.clone(), protect_guard)),
+        )
+        .route(
+            "/",
+            post(create).layer(from_fn_with_state(db.clone(), protect_admin)),
+        )
+        .route(
+            "/:uuid",
+            put(change)
+                .delete(remove)
+                .layer(from_fn_with_state(db.clone(), protect_admin)),
+        )
 }

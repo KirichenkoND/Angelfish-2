@@ -1,67 +1,15 @@
-use crate::middleware::{protect_admin, protect_guard};
-
 use super::{Json, Query, RouteResult, RouteState};
+use crate::middleware::{protect_admin, protect_guard};
 use anyhow::anyhow;
-use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
-    middleware::from_fn,
+    middleware::from_fn_with_state,
     routing::*,
 };
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use sqlx::PgPool;
-use time::{Duration, OffsetDateTime};
-use tower_sessions::{Expiry, Session};
-use utoipa::{openapi::OpenApi, IntoParams, ToSchema};
-
-#[derive(Serialize, ToSchema)]
-struct Me {
-    role: String,
-}
-
-#[utoipa::path(get, path = "/roles/me")]
-async fn me(session: Session) -> RouteResult<Json<Me>> {
-    let role: String = session.get("role").await?.ok_or(anyhow!("Unauthorized"))?;
-
-    Ok(Json(Me { role }))
-}
-
-#[derive(Deserialize, ToSchema)]
-#[serde(deny_unknown_fields)]
-struct Login {
-    password: String,
-}
-
-/// Logs in as this role
-#[utoipa::path(post, path = "/roles/{role}/login", request_body = Login, responses((status = 200)))]
-async fn login(
-    session: Session,
-    Path(role): Path<String>,
-    State(db): RouteState,
-    Json(data): Json<Login>,
-) -> RouteResult {
-    let Login { password } = data;
-
-    let password_hash: String =
-        sqlx::query!("SELECT password_hash FROM Role WHERE role = $1", role)
-            .fetch_optional(&db)
-            .await?
-            .ok_or(anyhow!("Role is not found"))?
-            .password_hash
-            .ok_or(anyhow!("Cannot login into role without password"))?;
-
-    let hash = PasswordHash::try_from(password_hash.as_str()).unwrap();
-    Argon2::default()
-        .verify_password(password.as_bytes(), &hash)
-        .map_err(|_| anyhow!("Invalid password"))?;
-    session.set_expiry(Some(Expiry::AtDateTime(
-        OffsetDateTime::now_utc() + Duration::days(1),
-    )));
-    session.insert("role", role).await?;
-
-    Ok(())
-}
+use utoipa::{openapi::OpenApi, IntoParams};
 
 #[derive(Deserialize, IntoParams)]
 struct FetchQuery {
@@ -123,28 +71,22 @@ async fn remove(Path(category): Path<String>, State(db): RouteState) -> RouteRes
 
 pub fn openapi() -> OpenApi {
     #[derive(utoipa::OpenApi)]
-    #[openapi(
-        paths(
-            super::roles::fetch,
-            super::roles::create,
-            super::roles::me,
-            super::roles::login,
-            super::roles::remove
-        ),
-        components(schemas(super::roles::Me, super::roles::Login))
-    )]
+    #[openapi(paths(super::roles::fetch, super::roles::create, super::roles::remove))]
     struct ApiDoc;
 
     <ApiDoc as utoipa::OpenApi>::openapi()
 }
 
-pub fn router() -> Router<PgPool> {
+pub fn router(db: &PgPool) -> Router<PgPool> {
     Router::new()
-        .route("/", get(fetch).layer(from_fn(protect_guard)))
-        .route("/me", get(me))
+        .route(
+            "/",
+            get(fetch).layer(from_fn_with_state(db.clone(), protect_guard)),
+        )
         .route(
             "/:role",
-            post(create).delete(remove).layer(from_fn(protect_admin)),
+            post(create)
+                .delete(remove)
+                .layer(from_fn_with_state(db.clone(), protect_admin)),
         )
-        .route("/:role/login", post(login))
 }

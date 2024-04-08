@@ -1,7 +1,7 @@
 use super::{Json, Query, RouteResult, RouteState};
-use crate::models::Permission;
+use crate::{middleware::protect_admin, models::Permission};
 use anyhow::anyhow;
-use axum::{extract::State, http::Method, routing::*};
+use axum::{extract::State, http::Method, middleware::from_fn_with_state, routing::*};
 use serde::Deserialize;
 use sqlx::PgPool;
 use utoipa::{openapi::OpenApi, IntoParams};
@@ -138,6 +138,8 @@ pub fn openapi() -> OpenApi {
     <ApiDoc as utoipa::OpenApi>::openapi()
 }
 
-pub fn router() -> Router<PgPool> {
-    Router::new().route("/", get(fetch).post(change_perms).delete(change_perms))
+pub fn router(db: &PgPool) -> Router<PgPool> {
+    Router::new()
+        .route("/", get(fetch).post(change_perms).delete(change_perms))
+        .layer(from_fn_with_state(db.clone(), protect_admin))
 }

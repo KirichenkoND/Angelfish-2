@@ -47,12 +47,13 @@ async fn main() -> Result<(), error::Error> {
     let swagger = SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", openapi);
 
     let app = Router::new()
-        .nest("/categories", routes::categories::router())
-        .nest("/roles", routes::roles::router())
-        .nest("/people", routes::people::router())
-        .nest("/rooms", routes::rooms::router())
-        .nest("/permissions", routes::perms::router())
-        .nest("/logs", routes::logs::router())
+        .nest("/categories", routes::categories::router(&db))
+        .nest("/roles", routes::roles::router(&db))
+        .nest("/people", routes::people::router(&db))
+        .nest("/rooms", routes::rooms::router(&db))
+        .nest("/permissions", routes::perms::router(&db))
+        .nest("/logs", routes::logs::router(&db))
+        .nest("/auth", routes::auth::router())
         .layer(session_layer)
         .merge(swagger)
         .with_state(db);

@@ -32,6 +32,8 @@ pub struct Room {
 #[serde(deny_unknown_fields)]
 pub struct Person {
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub phone: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub uuid: Option<Uuid>,
     pub first_name: String,
     pub last_name: String,
