@@ -20,6 +20,7 @@ struct FetchQuery {
 /// Fetch permissions
 #[utoipa::path(
     get,
+    tag = "Permission management",
     path = "/permissions",
     params(FetchQuery),
     responses(
@@ -67,6 +68,7 @@ async fn fetch(
 /// Create permissions
 #[utoipa::path(
     post,
+    tag = "Permission management",
     path = "/permissions",
     request_body = Permission
 )]

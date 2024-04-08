@@ -24,6 +24,7 @@ struct FetchQuery {
 /// Get logs
 #[utoipa::path(
     get,
+    tag = "Log history",
     path = "/logs",
     params(FetchQuery),
     responses(

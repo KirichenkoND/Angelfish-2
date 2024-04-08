@@ -17,7 +17,7 @@ struct FetchQuery {
 }
 
 /// Fetch room categories
-#[utoipa::path(get, path = "/categories", params(FetchQuery), responses(
+#[utoipa::path(get, tag = "Categories management", path = "/categories", params(FetchQuery), responses(
     (status = 200, body = Vec<String>)
 ))]
 async fn fetch(
@@ -42,7 +42,7 @@ async fn fetch(
 }
 
 /// Create new category
-#[utoipa::path(post, path = "/categories/{category}", params(("category" = String, Path, description = "New category name")))]
+#[utoipa::path(post, tag = "Categories management", path = "/categories/{category}", params(("category" = String, Path, description = "New category name")))]
 async fn create(Path(category): Path<String>, State(db): RouteState) -> RouteResult {
     let result = sqlx::query!("INSERT INTO Category(category) VALUES($1)", category)
         .execute(&db)
@@ -59,7 +59,7 @@ async fn create(Path(category): Path<String>, State(db): RouteState) -> RouteRes
 }
 
 /// Delete category
-#[utoipa::path(delete, path = "/categories/{category}", params(("category" = String, Path, description = "Category to delete")))]
+#[utoipa::path(delete, tag = "Categories management", path = "/categories/{category}", params(("category" = String, Path, description = "Category to delete")))]
 async fn remove(Path(category): Path<String>, State(db): RouteState) -> RouteResult<StatusCode> {
     let result = sqlx::query!("DELETE FROM Category WHERE category = $1", category)
         .execute(&db)

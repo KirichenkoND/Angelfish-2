@@ -25,6 +25,7 @@ struct FetchQuery {
 /// Fetch people
 #[utoipa::path(
     get,
+    tag = "People management",
     path = "/people",
     params(FetchQuery),
     responses(
@@ -61,6 +62,7 @@ async fn fetch(
 /// Only `uuid`, `first_name`, `last_name`, `middle_name`, `role` fields are used.
 #[utoipa::path(
     post,
+    tag = "People management",
     path = "/people",
     request_body = Person,
 )]
@@ -100,6 +102,7 @@ async fn create(State(db): RouteState, Json(data): Json<Person>) -> RouteResult 
 /// Edits person record
 #[utoipa::path(
     put,
+    tag = "People management",
     path = "/people/{uuid}",
     params(
         ("uuid" = Uuid, Path, description = "Uuid of the person to edit")
@@ -155,6 +158,7 @@ async fn change(
 /// Deletes person record
 #[utoipa::path(
     delete,
+    tag = "People management",
     path = "/people/{uuid}",
     params(
         ("uuid" = Uuid, Path, description = "Uuid of the person to delete")

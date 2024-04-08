@@ -28,6 +28,7 @@ struct Fetch {
 /// Fetch rooms
 #[utoipa::path(
     get,
+    tag = "Room management",
     path = "/rooms",
     params(Fetch),
     responses(
@@ -79,6 +80,7 @@ async fn fetch(State(db): RouteState, Query(query): Query<Fetch>) -> RouteResult
 /// Only `category`, `floor`, `name` fields are used.
 #[utoipa::path(
     post,
+tag = "Room management",
     path = "/rooms",
     request_body = Room
 )]
@@ -119,7 +121,7 @@ enum Direction {
 }
 
 /// Try to enter/leave a room (EMBEDDED API)
-#[utoipa::path(post, path = "/rooms/{room_id}/{direction}/{person_uuid}", params(
+#[utoipa::path(post, tag = "Room management", path = "/rooms/{room_id}/{direction}/{person_uuid}", params(
     ("room_id" = i32, Path, description = "Id of the room"),
     ("direction" = Direction, Path, description = "Enter/leave"),
     ("person_uuid" = Uuid, Path, description = "Uuid of the person trying to access the room")
@@ -164,7 +166,7 @@ async fn pass(
 }
 
 /// Delete room
-#[utoipa::path(delete, path = "/rooms/{room_id}", params(("room_id" = i32, Path, description = "Id of the room to delete")))]
+#[utoipa::path(delete, tag = "Room management", path = "/rooms/{room_id}", params(("room_id" = i32, Path, description = "Id of the room to delete")))]
 async fn remove(Path(room_id): Path<i32>, State(db): RouteState) -> RouteResult<StatusCode> {
     let result = sqlx::query!("DELETE FROM Room WHERE id = $1", room_id)
         .execute(&db)

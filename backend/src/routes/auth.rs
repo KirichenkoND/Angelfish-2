@@ -11,7 +11,7 @@ use utoipa::{openapi::OpenApi, ToSchema};
 use uuid::Uuid;
 
 /// Returns personal info of the current user
-#[utoipa::path(get, path = "/auth/me")]
+#[utoipa::path(get, tag = "Authentication", path = "/auth/me")]
 async fn me(State(db): RouteState, session: Session) -> RouteResult<Json<Person>> {
     let person_uuid: Uuid = session
         .get("person_uuid")
@@ -36,7 +36,7 @@ struct Login {
 }
 
 /// Logs in as this role
-#[utoipa::path(post, path = "/auth/login", request_body = Login, responses((status = 200)))]
+#[utoipa::path(post, tag = "Authentication", path = "/auth/login", request_body = Login, responses((status = 200)))]
 async fn login(session: Session, State(db): RouteState, Json(data): Json<Login>) -> RouteResult {
     let Login { phone, password } = data;
 
@@ -65,7 +65,7 @@ async fn login(session: Session, State(db): RouteState, Json(data): Json<Login>)
 }
 
 /// Loggs out of the session
-#[utoipa::path(post, path = "/logout", responses((status = 200)))]
+#[utoipa::path(post, tag = "Authentication", path = "/logout", responses((status = 200)))]
 async fn logout(session: Session) -> RouteResult {
     session.delete().await?;
     Ok(())
