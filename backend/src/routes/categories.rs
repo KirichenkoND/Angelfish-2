@@ -1,8 +1,11 @@
+use crate::middleware::{protect_admin, protect_guard};
+
 use super::{Json, Query, RouteResult, RouteState};
 use anyhow::anyhow;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
+    middleware::from_fn,
     routing::*,
 };
 use serde::Deserialize;
@@ -83,6 +86,9 @@ pub fn openapi() -> OpenApi {
 
 pub fn router() -> Router<PgPool> {
     Router::new()
-        .route("/", get(fetch))
-        .route("/:category", post(create).delete(remove))
+        .route("/", get(fetch).layer(from_fn(protect_guard)))
+        .route(
+            "/:category",
+            post(create).delete(remove).layer(from_fn(protect_admin)),
+        )
 }

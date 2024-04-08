@@ -8,6 +8,7 @@ use tracing_subscriber::EnvFilter;
 use utoipa_swagger_ui::SwaggerUi;
 
 mod error;
+mod middleware;
 mod models;
 mod routes;
 

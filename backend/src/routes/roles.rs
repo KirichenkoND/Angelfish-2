@@ -1,9 +1,12 @@
+use crate::middleware::{protect_admin, protect_guard};
+
 use super::{Json, Query, RouteResult, RouteState};
 use anyhow::anyhow;
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
+    middleware::from_fn,
     routing::*,
 };
 use serde::{Deserialize, Serialize};
@@ -20,6 +23,7 @@ struct Me {
 #[utoipa::path(get, path = "/roles/me")]
 async fn me(session: Session) -> RouteResult<Json<Me>> {
     let role: String = session.get("role").await?.ok_or(anyhow!("Unauthorized"))?;
+
     Ok(Json(Me { role }))
 }
 
@@ -29,7 +33,8 @@ struct Login {
     password: String,
 }
 
-#[utoipa::path(post, path = "/roles/{role}/login", request_body = LoginReques, responses((status = 200)))]
+/// Logs in as this role
+#[utoipa::path(post, path = "/roles/{role}/login", request_body = Login, responses((status = 200)))]
 async fn login(
     session: Session,
     Path(role): Path<String>,
@@ -135,8 +140,11 @@ pub fn openapi() -> OpenApi {
 
 pub fn router() -> Router<PgPool> {
     Router::new()
-        .route("/", get(fetch))
+        .route("/", get(fetch).layer(from_fn(protect_guard)))
         .route("/me", get(me))
-        .route("/:role", post(create).delete(remove))
+        .route(
+            "/:role",
+            post(create).delete(remove).layer(from_fn(protect_admin)),
+        )
         .route("/:role/login", post(login))
 }
