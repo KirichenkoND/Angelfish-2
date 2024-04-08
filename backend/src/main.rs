@@ -39,6 +39,7 @@ async fn main() -> Result<(), error::Error> {
     openapi.merge(routes::rooms::openapi());
     openapi.merge(routes::perms::openapi());
     openapi.merge(routes::logs::openapi());
+    openapi.merge(routes::auth::openapi());
 
     let session_store = PostgresStore::new(db.clone());
     session_store.migrate().await?;

@@ -7,15 +7,16 @@ use serde::Deserialize;
 use sqlx::PgPool;
 use time::{Duration, OffsetDateTime};
 use tower_sessions::{Expiry, Session};
-use utoipa::ToSchema;
+use utoipa::{openapi::OpenApi, ToSchema};
 use uuid::Uuid;
 
+/// Returns personal info of the current user
 #[utoipa::path(get, path = "/auth/me")]
 async fn me(State(db): RouteState, session: Session) -> RouteResult<Json<Person>> {
     let person_uuid: Uuid = session
         .get("person_uuid")
         .await?
-        .ok_or(anyhow!("Не авторизован"))?;
+        .ok_or(anyhow!("Запрос не авторизован"))?;
 
     let person = sqlx::query_as::<_, Person>(
         "SELECT * FROM Person JOIN Role ON Role.id = role_id WHERE Person.uuid = $1",
@@ -63,8 +64,27 @@ async fn login(session: Session, State(db): RouteState, Json(data): Json<Login>)
     Ok(())
 }
 
+/// Loggs out of the session
+#[utoipa::path(post, path = "/logout", responses((status = 200)))]
+async fn logout(session: Session) -> RouteResult {
+    session.delete().await?;
+    Ok(())
+}
+
+pub fn openapi() -> OpenApi {
+    #[derive(utoipa::OpenApi)]
+    #[openapi(
+        paths(super::auth::me, super::auth::login, super::auth::logout),
+        components(schemas(Login))
+    )]
+    struct ApiDoc;
+
+    <ApiDoc as utoipa::OpenApi>::openapi()
+}
+
 pub fn router() -> Router<PgPool> {
     Router::new()
         .route("/me", get(me))
         .route("/login", post(login))
+        .route("/logout", post(logout))
 }

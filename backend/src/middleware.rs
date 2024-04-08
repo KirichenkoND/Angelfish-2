@@ -21,7 +21,7 @@ async fn get_role(req: &mut Request, pool: &PgPool) -> Result<String, Error> {
         .await
         .map_err(|msg| anyhow!("{msg}"))?
     else {
-        return Err(anyhow!("Не авторизован").into());
+        return Err(anyhow!("Запрос не авторизован").into());
     };
 
     let Some(record) = sqlx::query!(
@@ -47,7 +47,7 @@ pub async fn protect_guard(
     if role == "security" || role == "admin" {
         Ok(next.run(req).await)
     } else {
-        Err(anyhow!("Вход запрещен").into())
+        Err(anyhow!("Действие запрещено").into())
     }
 }
 
@@ -61,6 +61,6 @@ pub async fn protect_admin(
     if role == "admin" {
         Ok(next.run(req).await)
     } else {
-        Err(anyhow!("Вход запрещен").into())
+        Err(anyhow!("Действие запрещено").into())
     }
 }
