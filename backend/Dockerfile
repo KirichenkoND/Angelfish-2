@@ -4,23 +4,20 @@ RUN apk add libc-dev
 
 WORKDIR /app
 
-COPY ./Cargo.toml ./Cargo.lock ./
-
-RUN mkdir src
-RUN echo 'fn main() {}' > src/main.rs
-RUN cargo build --release
-
-COPY ./.sqlx ./.sqlx
-COPY ./migrations ./migrations
-COPY ./src ./src
-
-RUN echo -e '\n' >> src/main.rs
-RUN cargo build --release
+RUN \
+  --mount=source=Cargo.lock,target=Cargo.lock \
+  --mount=source=Cargo.toml,target=Cargo.toml \
+  --mount=source=src,target=src \
+  --mount=source=.sqlx,target=.sqlx \
+  --mount=source=migrations,target=migrations \
+  --mount=type=cache,target=target \
+  --mount=type=cache,target=/usr/local/cargo/registry \
+  cargo build --release && cp ./target/release/backend /app/backend
 
 FROM alpine
 
 WORKDIR /app
 
-COPY --from=build /app/target/release/backend ./backend
+COPY --from=build /app/backend ./backend
 
 CMD [ "./backend" ]
