@@ -11,7 +11,7 @@ use utoipa::{openapi::OpenApi, ToSchema};
 use uuid::Uuid;
 
 /// Returns personal info of the current user
-#[utoipa::path(get, tag = "Authentication", path = "/auth/me")]
+#[utoipa::path(get, tag = "Authentication", path = "/auth/me", responses((status = 200, body = Person)))]
 async fn me(State(db): RouteState, session: Session) -> RouteResult<Json<Person>> {
     let person_uuid: Uuid = session
         .get("person_uuid")
