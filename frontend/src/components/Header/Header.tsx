@@ -6,10 +6,13 @@ import Button from "../../UI/Button/Button";
 import { useDispatch } from "react-redux";
 import { setAdminState, setSecurityState } from "../../store/Slices/userSlice";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom"; 
 
 export const Header: React.FC = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const role = useSelector(state => state.user.role);
+  
   const setAdmin = React.useCallback(() => {
     dispatch(setAdminState())
 
@@ -18,6 +21,10 @@ export const Header: React.FC = () => {
     dispatch(setSecurityState())
   }, [])
 
+  const handleAuthNavigate = React.useCallback(() => {
+    navigate('/auth');
+  }, [navigate]);
+
   return (
     <>
       <header>
@@ -25,17 +32,22 @@ export const Header: React.FC = () => {
           {/* <div className="back-button">
             <BackButton />
           </div> */}
-          <Button 
+          {/* <Button 
             text="security"
             onClick={setSecurity}
             disabled={role === "security"}
-          />
+          /> */}
           <div className="header-logo">
             <HeaderLink image={logo} path="/" />
           </div>
-          <Button
+          {/* <Button
             text="admin"
             onClick={setAdmin}
+            disabled={role === "admin"}
+          /> */}
+          <Button
+            text="Auth"
+            onClick={handleAuthNavigate}
             disabled={role === "admin"}
           />
         </div>
