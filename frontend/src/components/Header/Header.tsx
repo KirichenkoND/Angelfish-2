@@ -32,19 +32,19 @@ export const Header: React.FC = () => {
           {/* <div className="back-button">
             <BackButton />
           </div> */}
-          {/* <Button 
+          <Button 
             text="security"
             onClick={setSecurity}
             disabled={role === "security"}
-          /> */}
+          />
           <div className="header-logo">
             <HeaderLink image={logo} path="/" />
           </div>
-          {/* <Button
+          <Button
             text="admin"
             onClick={setAdmin}
             disabled={role === "admin"}
-          /> */}
+          />
           <Button
             text="Auth"
             onClick={handleAuthNavigate}
