@@ -4,14 +4,17 @@ use crate::{
     models::Person,
 };
 use anyhow::anyhow;
+use argon2::PasswordHasher;
+use argon2::{password_hash::SaltString, Argon2};
 use axum::{
     extract::{Path, State},
     middleware::from_fn_with_state,
     routing::*,
 };
+use rand::rngs::OsRng;
 use serde::Deserialize;
 use sqlx::PgPool;
-use utoipa::{openapi::OpenApi, IntoParams};
+use utoipa::{openapi::OpenApi, IntoParams, ToSchema};
 use uuid::Uuid;
 
 #[derive(Deserialize, IntoParams)]
@@ -58,32 +61,52 @@ async fn fetch(
     Ok(Json(results))
 }
 
+#[derive(Deserialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+struct CreatePersonRequest {
+    uuid: Option<Uuid>,
+    first_name: String,
+    last_name: String,
+    middle_name: Option<String>,
+    role: String,
+    phone: Option<String>,
+    password: Option<String>,
+}
+
 /// Create new person record
 /// Only `uuid`, `first_name`, `last_name`, `middle_name`, `role` fields are used.
 #[utoipa::path(
     post,
     tag = "People management",
     path = "/people",
-    request_body = Person,
+    request_body = CreatePersonRequest,
 )]
-async fn create(State(db): RouteState, Json(data): Json<Person>) -> RouteResult {
-    let Person {
+async fn create(State(db): RouteState, Json(data): Json<CreatePersonRequest>) -> RouteResult {
+    let CreatePersonRequest {
         uuid,
         first_name,
         last_name,
         middle_name,
         role,
         phone,
-        ..
+        password,
     } = data;
+
+    let password_hash = password.map(|pass| {
+        Argon2::default()
+            .hash_password(pass.as_bytes(), &SaltString::generate(OsRng))
+            .unwrap()
+            .to_string()
+    });
 
     sqlx::query!(
         r#"
-        INSERT INTO Person(uuid, first_name, last_name, middle_name, role_id, phone) VALUES(
+        INSERT INTO Person(uuid, first_name, last_name, middle_name, role_id, phone, password_hash) VALUES(
             coalesce($1, gen_random_uuid()),
             $2, $3, $4,
             coalesce((SELECT id FROM Role WHERE role = $5), 0),
-            $6
+            $6,
+            $7
         )
     "#,
         uuid,
@@ -91,7 +114,8 @@ async fn create(State(db): RouteState, Json(data): Json<Person>) -> RouteResult 
         last_name,
         middle_name,
         role,
-        phone
+        phone,
+        password_hash
     )
     .execute(&db)
     .await?;
@@ -185,7 +209,7 @@ pub fn openapi() -> OpenApi {
             super::people::change,
             super::people::remove
         ),
-        components(schemas(Person))
+        components(schemas(Person, CreatePersonRequest))
     )]
     struct ApiDoc;
 
