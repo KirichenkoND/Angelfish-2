@@ -1,6 +1,6 @@
 # Пропускная система (АИС КПП)
 
-Пропускная система - это программная система, предназначенная для контроля помещений и безопаности.
+Пропускная система - это программная система, предназначенная для контроля и управления доступами.
 
 # Содержание <a name="Содержание"></a>
 * [Содержание](#Содержание)
@@ -34,38 +34,33 @@
 ![Alt-текст](img/100_database.jpg "Схема Базы данных")
 
 # API и SWAGGER <a name="API_SWAGGER"></a>
-Swagger расположен по следующей ссылке: [*swagger*](http://api.hospital.efbo.ru/swagger-ui/)
+Swagger расположен по следующей ссылке: [*swagger*](http://api.securitypass.efbo.ru/swagger-ui/)
 
 # Макет веб-приложения <a name="Макет"></a>
-Макет веб-приложения расположен по следующей ссылке [*макет*](https://www.figma.com/file/0ZRSijy5h8b0xTVLDtl7Pj/%D0%9F%D0%BE%D0%BB%D0%B8%D0%BA%D0%BB%D0%B8%D0%BD%D0%B8%D0%BA%D0%B0?type=design&node-id=0-1&mode=design&t=rnU5u2QP7wvDrIpP-0)
+Макет веб-приложения расположен по следующей ссылке [*макет*](https://www.figma.com/)
 
 ## Описание макетов приложения
 1. Авторизация
-![Alt-текст](img/auth.png "Авторизация")
+![Alt-текст](img/1_auth.jpg "Авторизация")
 
-1. Список пациентов
-![Alt-текст](img/2_pati.png "Список пациентов")
+1. Главная страница
+![Alt-текст](img/2_mainpage_1.jpg "Главная страница")
+![Alt-текст](img/2_mainpage_2.jpg "Главная страница")
 
-1. Карточка пациента
-![Alt-текст](img/3_paticard.png "Карточка пациента")
+1. Карта
+![Alt-текст](img/3_map.jpg "Карта")
 
-1. Приём врача
-![Alt-текст](img/4_pati_4.png "Приём")
+1. Настройки категорий
+![Alt-текст](img/4_settings_category.jpg "Настройки категорий")
 
-1. Список врачей
-![Alt-текст](img/5_vrach.png "Список врачей")
+1. Настройки ролей
+![Alt-текст](img/4_settings_roles.jpg "Настройки ролей")
 
-1. Карточка врача
-![Alt-текст](img/6_vrach.png "Карточка врача")
+1. Настройка прав
+![Alt-текст](img/4_settings_perms.jpg "Настройка прав")
 
-1. Расписание врача
-![Alt-текст](img/7_rasp.png "Расписание врача")
-
-1. Добавить врача
-![Alt-текст](img/8_add.png "Добавить врача")
-
-1. Медкарта пациента
-![Alt-текст](img/patient.png "Медкарта пациента")
+1. Настройка помещений
+![Alt-текст](img/4_settings_rooms.jpg "Настройка помещений")
 
 # Docker <a name="Docker"></a>
 Для сборки проекта необходимо скачать и установить docker. 
@@ -75,13 +70,13 @@ Swagger расположен по следующей ссылке: [*swagger*](h
 # Сбор и запуск контейнера backend в Docker
 ```
 cd backend
-docker build -t hospital-backend .
-docker run --name hospital-backend -e DATABASE_URL=<postgres_url> -d -p 9009:9000 hospital-backend
+docker build -t securitypass-backend .
+docker run --name securitypass-backend -e DATABASE_URL=<postgres_url> -d -p 9009:9000 securitypass-backend
 ```
 
 # Сбор и запуск контейнера frontend в Docker
 ```
 cd frontend
-docker build -t hospital-frontend .
-docker run --name hospital-frontend -d -p 30000:3000 hospital-frontend
+docker build -t securitypass-frontend .
+docker run --name securitypass-frontend -d -p 30000:3000 securitypass-frontend
 ```
