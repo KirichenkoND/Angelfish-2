@@ -1,6 +1,6 @@
 import React from "react";
 import HeaderLink from "../HeaderLink/HeaderLink";
-import logo from "../../assets/react.svg";
+import logo from "../../../public/logo.svg";
 import "./Header.scss";
 import Button from "../../UI/Button/Button";
 import { useDispatch } from "react-redux";
