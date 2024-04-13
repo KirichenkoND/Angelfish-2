@@ -3,10 +3,13 @@ import "./Editors.scss";
 import SearchBar from "../../UI/SearchBar/SearchBar";
 import {
   TPermissions,
+  perms,
   useDeletePermissionsMutation,
   useGetPermissionsQuery,
   usePostPermissionsMutation,
 } from "../../api/permissionsApi";
+import { useGetCategoriesQuery } from "../../api/categoriesApi";
+import { useGetRolesQuery } from "../../api/rolesApi";
 
 const Permissions = [
   {
@@ -27,6 +30,18 @@ const EditorPerms: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data, isError, isLoading, isSuccess, refetch } =
     useGetPermissionsQuery();
+  const {
+    data: data1,
+    isError: isError1,
+    isLoading: isLoading1,
+    isSuccess: isSuccess1,
+  } = useGetCategoriesQuery();
+  const {
+    data: data2,
+    isError: isError2,
+    isLoading: isLoading2,
+    isSuccess: isSuccess2,
+  } = useGetRolesQuery();
   const [permissions, setPermissions] = useState<TPermissions>([]);
   const [deleteLog] = useDeletePermissionsMutation();
   const [addLog] = usePostPermissionsMutation();
@@ -38,7 +53,7 @@ const EditorPerms: React.FC = () => {
   });
   useEffect(() => {
     if (isSuccess) {
-      setPermissions(data ?? []); // Устанавливаем данные, если запрос успешен
+      setPermissions(data ?? []);
     }
   }, [data, isSuccess]);
 
@@ -63,9 +78,12 @@ const EditorPerms: React.FC = () => {
 
   const AddPermission = async () => {
     try {
-      await addLog(newPermission);
-      setNewPermission({ category: "", person_uuid: "", role: "", room_id: 0 }); // Очищаем поле после успешного добавления
-      // Обновляем данные вызовом refetch
+      console.log(newPermission)
+      const filteredObj = Object.fromEntries(
+        Object.entries(newPermission).filter(([_, v]) => v !== "")
+      );
+      await addLog(filteredObj);
+      setNewPermission({ category: "", person_uuid: "", role: "", room_id: 0 });
       refetch();
     } catch (error) {
       console.error("Ошибка при добавлении категории:", error);
@@ -77,22 +95,45 @@ const EditorPerms: React.FC = () => {
       <SearchBar />
       <div className="universal-editor">
         <div className="add-universal">
-          <input
-            type="text"
+          <select
+            name="speciality"
+            id="speciality"
             value={newPermission.category}
-            onChange={(e) =>
-              setNewPermission({ ...newPermission, category: e.target.value })
-            }
-            placeholder="Категория"
-          />
-          <input
-            type="text"
+            onChange={(e) => {
+              setNewPermission({ ...newPermission, category: e.target.value });
+            }}
+            style={{ minWidth: "20vw", minHeight: "3vh" }}
+          >
+            <option key={0} value={""} disabled style={{display: 'none'}}>Категория</option>
+            {isSuccess1 &&
+              data1.map((category) => {
+                return (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                );
+              })}
+          </select>
+
+          <select
+            name="speciality"
+            id="speciality"
             value={newPermission.role}
-            onChange={(e) =>
-              setNewPermission({ ...newPermission, role: e.target.value })
-            }
-            placeholder="Роль"
-          />
+            onChange={(e) => {
+              setNewPermission({ ...newPermission, role: e.target.value });
+            }}
+            style={{ minWidth: "20vw", minHeight: "3vh" }}
+          >
+            <option key={0} value={""} disabled style={{display: 'none'}}>Роль</option>
+            {isSuccess2 &&
+              data2.map((role) => {
+                return (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                );
+              })}
+          </select>
           <input
             type="text"
             value={newPermission.person_uuid}
@@ -121,7 +162,9 @@ const EditorPerms: React.FC = () => {
           {permissions.map((permission, index) => (
             <li key={index}>
               {`Category: ${permission.category}, Role: ${permission.role}, UUID: ${permission.person_uuid}, Room ID: ${permission.room_id}`}
-              <button onClick={() => DeletePermission(permission.person_uuid)}>Удалить</button>
+              <button onClick={() => DeletePermission(permission.person_uuid)}>
+                Удалить
+              </button>
             </li>
           ))}
         </ul>

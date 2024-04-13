@@ -5,6 +5,11 @@ export interface ILogin {
     password: string;
 }
 
+export interface IProfile {
+    phone: string;
+    role: string;
+}
+
 //TODO: дописать передачу аргументов через вопрос
 
 export const authApi = createApi({
@@ -18,7 +23,16 @@ export const authApi = createApi({
                 body: credentials,
             }),
         }),
+        logout: builder.mutation({
+            query: () => ({
+                url: 'auth/logout',
+                method: 'POST'
+            }),
+        }),
+        me: builder.query<IProfile, void>({
+            query: () => `auth/me`,
+        }),
     }),
 })
 
-export const { useLoginMutation } = authApi;
+export const { useLoginMutation, useLogoutMutation, useMeQuery } = authApi;

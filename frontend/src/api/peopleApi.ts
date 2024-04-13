@@ -30,7 +30,10 @@ export const peopleApi = createApi({
         deletePeople: builder.mutation<string, string>({
             query: (uuid) => ({ url: `people/${uuid}`, method: 'DELETE' }),
         }),
+        patchPeople: builder.mutation({
+            query: (args) => ({ url: `people/${args.uuid}`, method: 'PATCH' }),
+        }),
     }),
 })
 
-export const { useDeletePeopleMutation, useGetPeopleQuery, usePostPeopleMutation, usePutPeopleMutation } = peopleApi;
+export const { useDeletePeopleMutation, useGetPeopleQuery, usePostPeopleMutation, usePutPeopleMutation, usePatchPeopleMutation } = peopleApi;

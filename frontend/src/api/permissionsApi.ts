@@ -7,6 +7,18 @@ interface IPermissions {
   room_id: number;
 };
 
+export interface IPermissionsOnly {
+  person_uuid: string;
+  room_id: number;
+};
+
+export interface IPermissionsOver {
+  role: string;
+  room_id: number;
+};
+
+export type perms = IPermissionsOnly | IPermissionsOver
+
 export type TPermissions = IPermissions[];
 
 //TODO: дописать передачу параметров в get запрос
@@ -18,8 +30,8 @@ export const permissionsApi = createApi({
     getPermissions: builder.query<TPermissions, void>({
       query: () => `permissions`,
     }),
-    postPermissions: builder.mutation<string, IPermissions>({
-      query: () => ({ url: `permissions`, method: 'POST' }),
+    postPermissions: builder.mutation<string, { [k: string]: string | number; }>({
+      query: (body) => ({ url: `permissions`, method: 'POST', body: body }),
     }),
     deletePermissions: builder.mutation<string, string>({
       query: (name) => ({ url: `Permissions/${name}`, method: 'DELETE' }),
