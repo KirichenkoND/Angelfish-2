@@ -14,10 +14,13 @@ export const logsApi = createApi({
     reducerPath: 'logsApi',
     baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:9119/api/' }),
     endpoints: (builder) => ({
-        getLogs: builder.query<TLogs, number | string | void>({
+        getLogsByRoomId: builder.query<TLogs, number | string>({
             query: (room_id) => `logs?room_id=${room_id}`,
+        }),
+        getAllLogs: builder.query<TLogs, void>({
+            query: () => `logs`,
         }),
     }),
 })
 
-export const { useGetLogsQuery } = logsApi;
+export const { useGetLogsByRoomIdQuery, useGetAllLogsQuery } = logsApi;

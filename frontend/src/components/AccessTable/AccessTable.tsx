@@ -1,13 +1,13 @@
 import React from "react";
 import "./AccessTable.scss";
 import SearchBar from "../../UI/SearchBar/SearchBar";
-import { useGetLogsQuery } from "../../api/logsApi";
+import { useGetAllLogsQuery } from "../../api/logsApi";
 import { DNA } from "react-loader-spinner";
 
 // TODO: Дописать поиск и обработку ошибки
 
 const AccessTable: React.FC = () => {
-  const { data, isError, isLoading, isSuccess } = useGetLogsQuery();
+  const { data, isError, isLoading, isSuccess } = useGetAllLogsQuery();
   if (isError) {
     return <>Ашыбка</>;
   }
@@ -28,7 +28,8 @@ const AccessTable: React.FC = () => {
             <th>CardID</th>
             <th>RoomID</th>
             <th>AccessTimeStamp</th>
-            <th>AccessResult</th>
+            <th>Entered</th>
+            <th>Allowed</th>
           </tr>
         </thead>
         <tbody>
@@ -43,7 +44,8 @@ const AccessTable: React.FC = () => {
                   <td>{item.person_uuid}</td>
                   <td>{item.room_id}</td>
                   <td>{item.time}</td>
-                  <td>{item.entered ? "True" : "False"}</td>
+                  <td>{item.entered ? "Вход" : "Выход"}</td>
+                  <td>{item.allowed ? "True" : "False"}</td>
                 </tr>
               ))}
         </tbody>
