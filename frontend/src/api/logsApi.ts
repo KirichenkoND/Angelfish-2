@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
-interface ILogs {
+export interface ILogs {
     allowed: boolean;
     entered: boolean;
     person_uuid: string;
@@ -14,8 +14,8 @@ export const logsApi = createApi({
     reducerPath: 'logsApi',
     baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:9119/api/' }),
     endpoints: (builder) => ({
-        getLogs: builder.query<TLogs, void>({
-            query: () => `logs`,
+        getLogs: builder.query<TLogs, number | string | void>({
+            query: (room_id) => `logs?room_id=${room_id}`,
         }),
     }),
 })

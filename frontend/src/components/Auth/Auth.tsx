@@ -1,48 +1,47 @@
 import React, { useCallback, useState } from "react";
 import Button from "../../UI/Button/Button";
 import Input from "../../UI/Input/Input";
-/*import { useAppDispatch } from "../../store/store";*/
+import { useAppDispatch } from "../../store/store";
 import { useNavigate } from "react-router-dom";
-/*import { setUser } from "../../store/slices/userSlice";
-import { ILogin } from "../../api/interfaces";
-import { useLoginMutation } from "../../api/api";*/
+import { setUser } from "../../store/Slices/userSlice";
+import { ILogin, useLoginMutation } from "../../api/authApi";
 import "./Auth.scss";
 
-const Auth: React.FC = () => {
-    /*const [login, { isError, isLoading, isSuccess }] = useLoginMutation();
+const successStyle: React.CSSProperties = {
+    color: 'green'
+  };
 
+const nevalidStyle: React.CSSProperties = {
+    color: 'red'
+  };
+
+const Auth: React.FC = () => {
+    const [login, { isError, isLoading, isSuccess }] = useLoginMutation();
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
-    const handleChangePhone = (event: React.ChangeEvent<any>) => {
+
+    const handleChangePhone = (event: React.ChangeEvent<HTMLInputElement>) => {
         setPhone(event.target.value);
     };
-    const handleChangePassword = (event: React.ChangeEvent<any>) => {
+    const handleChangePassword = (event: React.ChangeEvent<HTMLInputElement>) => {
         setPassword(event.target.value);
     };
 
     const credentials: ILogin = { phone, password };
 
     const handleLogin = useCallback(() => {
-        login(credentials);
-    }, [credentials]);
+        login(credentials).then((res) => {
+            if (res.data) {
+                dispatch(setUser({ role: res.data.role }));
+                navigate("/");
+            }
+        });
+    }, [phone, password, dispatch, navigate, login]);
 
-    if (isSuccess) {
-        dispatch(setUser({ phone, role: 'receptionist' }))
-        navigate("/");
-    }*/
-
-    // ЗАГЛУШКИ
-    const isLoading = false;
-    const isError = true;
-    const phone = "1";
-    const password = "1";
-    const handleChangePhone = () => {};
-    const handleChangePassword = () => {};
-    const handleLogin = () => {};
     return (
-        <div className="container">
+        <div className="container">            
             {(isLoading && "Жди, ты грузишься, сори я устал поэтому без лоудера") ||
                 <>
                     <div className="login">
@@ -77,7 +76,8 @@ const Auth: React.FC = () => {
                     </div>
                 </>
             }
-            {isError && "Неправильный номер телефона или пароль"}
+            {isError && <p style={nevalidStyle}>Неправильный номер телефона или пароль</p>}
+            {isSuccess && <p style={successStyle}>Авторизация успешна!</p>}
         </div>
     );
 };

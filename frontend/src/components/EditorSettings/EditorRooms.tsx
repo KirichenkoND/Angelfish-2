@@ -7,24 +7,6 @@ import {
   usePostRoomMutation,
 } from "../../api/roomsApi";
 
-// const Rooms = [
-//   { category: "Лекционная", floor: 1, name: "101" },
-//   { category: "Лаборатория", floor: 1, name: "102" },
-//   { category: "Лекционная", floor: 1, name: "103" },
-//   { category: "Лаборатория", floor: 1, name: "104" },
-//   { category: "Лекционная", floor: 1, name: "10133" },
-//   { category: "Лаборатория", floor: 1, name: "1022" },
-//   { category: "Лекционная", floor: 1, name: "1034" },
-//   { category: "Лаборатория", floor: 1, name: "1044" },
-//   { category: "Лекционная", floor: 1, name: "1011" },
-//   { category: "Лаборатория", floor: 1, name: "1023" },
-//   { category: "Лекционная", floor: 1, name: "1035" },
-//   { category: "Лаборатория", floor: 1, name: "1045" },
-//   { category: "Лекционная", floor: 2, name: "201" },
-//   { category: "Лаборатория", floor: 2, name: "202" },
-//   { category: "Лекционная", floor: 3, name: "301" },
-//   { category: "Лаборатория", floor: 3, name: "302" },
-// ];
 
 const EditorRooms: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

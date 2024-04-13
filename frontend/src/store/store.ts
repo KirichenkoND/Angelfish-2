@@ -5,6 +5,7 @@ import { peopleApi } from "./../api/peopleApi";
 import { permissionsApi } from "./../api/permissionsApi";
 import { rolesApi } from "./../api/rolesApi";
 import { roomsApi } from "./../api/roomsApi";
+import { authApi } from "./../api/authApi";
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import userSlice from './Slices/userSlice';
 
@@ -17,6 +18,7 @@ export const store = configureStore({
         [permissionsApi.reducerPath]: permissionsApi.reducer,
         [rolesApi.reducerPath]: rolesApi.reducer,
         [roomsApi.reducerPath]: roomsApi.reducer,
+        [authApi.reducerPath]: authApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware()
@@ -26,7 +28,8 @@ export const store = configureStore({
                 peopleApi.middleware,
                 permissionsApi.middleware,
                 rolesApi.middleware,
-                roomsApi.middleware
+                roomsApi.middleware,
+                authApi.middleware
             )
 });
 

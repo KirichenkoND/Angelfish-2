@@ -3,6 +3,7 @@ import EditorCategories from "../../components/EditorSettings/EditorCategories";
 import EditorRoles from "../../components/EditorSettings/EditorRoles";
 import EditorRooms from "../../components/EditorSettings/EditorRooms";
 import EditorPerms from "../../components/EditorSettings/EditorPerms";
+import './SettingsPage.scss';
 
 const SettingsPage: React.FC = () => {
     const [selectedEditor, setSelectedEditor] = useState<string>('categories');
@@ -23,28 +24,7 @@ const SettingsPage: React.FC = () => {
     return (
         <>
             <h1>Важные настройки</h1>
-            <div>
-                <style>{`
-                    button {
-                        padding: 10px 20px;
-                        background-color: #007bff;
-                        color: white;
-                        border: none;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        font-size: 16px;
-                        transition: background-color 0.3s;
-
-                        &:hover {
-                            background-color: #0056b3;
-                        }
-
-                        &:focus {
-                            outline: none;
-                        }
-                    }
-               `}
-                </style>
+            <div className='settings_btn'>
                 <button onClick={() => setSelectedEditor('categories')}>Категории</button>
                 <button onClick={() => setSelectedEditor('roles')}>Роли</button>
                 <button onClick={() => setSelectedEditor('permissions')}>Права</button>
