@@ -5,24 +5,6 @@ import Popup from "../Popup/Popup";
 import { useGetLogsQuery } from "../../api/logsApi";
 import { DNA } from "react-loader-spinner";
 
-const mockData = [
-    { category: "Лекционная", floor: 1, name: "101" },
-    { category: "Лаборатория", floor: 1, name: "102" },
-    { category: "Лекционная", floor: 1, name: "103" },
-    { category: "Лаборатория", floor: 1, name: "104" },
-    { category: "Лекционная", floor: 1, name: "10133" },
-    { category: "Лаборатория", floor: 1, name: "1022" },
-    { category: "Лекционная", floor: 1, name: "1034" },
-    { category: "Лаборатория", floor: 1, name: "1044" },
-    { category: "Лекционная", floor: 1, name: "1011" },
-    { category: "Лаборатория", floor: 1, name: "1023" },
-    { category: "Лекционная", floor: 1, name: "1035" },
-    { category: "Лаборатория", floor: 1, name: "1045" },
-    { category: "Лекционная", floor: 2, name: "201" },
-    { category: "Лаборатория", floor: 2, name: "202" },
-    { category: "Лекционная", floor: 3, name: "301" },
-    { category: "Лаборатория", floor: 3, name: "302" },
-];
 
 const MapBuilding: React.FC = () => {
     const [currentFloor, setCurrentFloor] = useState(1);
@@ -31,7 +13,7 @@ const MapBuilding: React.FC = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const openPopup = () => setIsPopupOpen(true);
     const closePopup = () => setIsPopupOpen(false);
-    
+
     if (isError) {
         return <>Ошибка</>;
     }
@@ -44,7 +26,7 @@ const MapBuilding: React.FC = () => {
         <>
             <div className="map-building">
                 <div className="floor-switcher">
-                    {isSuccess && <FloorsMF 
+                    {isSuccess && <FloorsMF
                         propfloors={[...new Set(data.map(item => item.floor))]}
                         setCurrentFloor={setCurrentFloor}
                         currentFloor={currentFloor}
@@ -78,7 +60,7 @@ interface FloorsMFProps {
     currentFloor: number;
 }
 
-const FloorsMF: React.FC<FloorsMFProps> = ({propfloors, setCurrentFloor, currentFloor}) => {
+const FloorsMF: React.FC<FloorsMFProps> = ({ propfloors, setCurrentFloor, currentFloor }) => {
     return (
         propfloors.map(floor => (
             <button
@@ -102,27 +84,32 @@ const CabinetInfo: React.FC<CabinetInfoProps> = ({ room_id }) => {
     if (isLoading) {
         return <><DNA /></>;
     }
-    
+
     return (
-        <div style={{overflowY: "auto", maxHeight: '65vh'}}>
+        <div style={{ overflowY: "auto", maxHeight: '65vh' }}>
             <h3>Логи</h3>
-            {isSuccess && data.length === 0 &&
-                <>
-                    <h1>Пусто</h1>
-                </>
-            }
-            {isSuccess && data.map((info, i) => {
-                return (
-                    <div key={i}>
-                        <hr style={{backgroundColor: 'black', height: "3px"}}/>
-                        <p>{info.time}</p>
-                        <p>{info.allowed}</p>
-                        <p>{info.entered}</p>
-                        <p>{info.person_uuid}</p>
-                        <p>{info.room_id}</p>
-                    </div>
-                )
-            })}
+            <table className="AccessTable">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>UUID</th>
+                        <th>Room ID</th>
+                        <th>Allowed</th>
+                        <th>Entered</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {isSuccess && data.map((log, index) => (
+                        <tr key={index}>
+                            <td>{log.time}</td>
+                            <td>{log.person_uuid}</td>
+                            <td>{log.room_id}</td>
+                            <td>{log.allowed ? 'Yes' : 'No'}</td>
+                            <td>{log.entered ? 'Yes' : 'No'}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 };
