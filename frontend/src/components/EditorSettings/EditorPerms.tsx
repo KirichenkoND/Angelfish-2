@@ -161,7 +161,15 @@ const EditorPerms: React.FC = () => {
         <ul>
           {permissions.map((permission, index) => (
             <li key={index}>
-              {`Category: ${permission.category}, Role: ${permission.role}, UUID: ${permission.person_uuid}, Room ID: ${permission.room_id}`}
+              {
+                [
+                  addTag('Category', permission.category),
+                  addTag('Role', permission.role),
+                  addTag('UUID', permission.person_uuid),
+                  addTag('Room id', permission.room_id)
+                ].filter(x => x.length != 0).join(', ')
+              }
+              
               <button onClick={() => DeletePermission(permission.person_uuid)}>
                 Удалить
               </button>
@@ -172,5 +180,11 @@ const EditorPerms: React.FC = () => {
     </>
   );
 };
+
+const addTag = (name: string, value: string | undefined) => {
+  if (value) return `Category: ${value}`
+  else return ''
+
+}
 
 export default EditorPerms;
