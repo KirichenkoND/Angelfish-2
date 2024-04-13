@@ -3,6 +3,7 @@ import './MapBuilding.scss';
 import { useGetRoomQuery } from "../../api/roomsApi";
 import Popup from "../Popup/Popup";
 import { useGetLogsQuery } from "../../api/logsApi";
+import { DNA } from "react-loader-spinner";
 
 const mockData = [
     { category: "Лекционная", floor: 1, name: "101" },
@@ -26,11 +27,11 @@ const mockData = [
 const MapBuilding: React.FC = () => {
     const [currentFloor, setCurrentFloor] = useState(1);
     // const filteredData = mockData.filter(item => item.floor === currentFloor);
-    const floors = [...new Set(mockData.map(item => item.floor))];
     const { data, isLoading, isError, isSuccess } = useGetRoomQuery();
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const openPopup = () => setIsPopupOpen(true);
     const closePopup = () => setIsPopupOpen(false);
+    
     if (isError) {
         return <>Ошибка</>;
     }
@@ -43,15 +44,12 @@ const MapBuilding: React.FC = () => {
         <>
             <div className="map-building">
                 <div className="floor-switcher">
-                    {floors.map(floor => (
-                        <button
-                            key={floor}
-                            className={`floor-button ${currentFloor === floor ? 'active' : ''}`}
-                            onClick={() => setCurrentFloor(floor)}
-                        >
-                            {floor} этаж
-                        </button>
-                    ))}
+                    {isSuccess && <FloorsMF 
+                        propfloors={[...new Set(data.map(item => item.floor))]}
+                        setCurrentFloor={setCurrentFloor}
+                        currentFloor={currentFloor}
+                    />
+                    }
                 </div>
                 <div className="map">
                     {isSuccess && data.filter(item => item.floor === currentFloor).map((room, index) => (
@@ -74,6 +72,26 @@ interface CabinetInfoProps {
     room_id: number;
 }
 
+interface FloorsMFProps {
+    propfloors: number[];
+    setCurrentFloor: (x: number) => void;
+    currentFloor: number;
+}
+
+const FloorsMF: React.FC<FloorsMFProps> = ({propfloors, setCurrentFloor, currentFloor}) => {
+    return (
+        propfloors.map(floor => (
+            <button
+                key={floor}
+                className={`floor-button ${currentFloor === floor ? 'active' : ''}`}
+                onClick={() => setCurrentFloor(floor)}
+            >
+                {floor} этаж
+            </button>
+        ))
+    )
+}
+
 const CabinetInfo: React.FC<CabinetInfoProps> = ({ room_id }) => {
     const { data, isLoading, isError, isSuccess } = useGetLogsQuery(room_id);
 
@@ -82,14 +100,21 @@ const CabinetInfo: React.FC<CabinetInfoProps> = ({ room_id }) => {
     }
 
     if (isLoading) {
-        return <></>;
+        return <><DNA /></>;
     }
-
+    
     return (
-        <div>
+        <div style={{overflowY: "auto", maxHeight: '65vh'}}>
+            <h3>Логи</h3>
+            {isSuccess && data.length === 0 &&
+                <>
+                    <h1>Пусто</h1>
+                </>
+            }
             {isSuccess && data.map((info, i) => {
                 return (
                     <div key={i}>
+                        <hr style={{backgroundColor: 'black', height: "3px"}}/>
                         <p>{info.time}</p>
                         <p>{info.allowed}</p>
                         <p>{info.entered}</p>
