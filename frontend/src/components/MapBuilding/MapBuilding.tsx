@@ -76,6 +76,30 @@ const FloorsMF: React.FC<FloorsMFProps> = ({ propfloors, setCurrentFloor, curren
 
 const CabinetInfo: React.FC<CabinetInfoProps> = ({ room_id }) => {
     const { data, isLoading, isError, isSuccess } = useGetLogsQuery(room_id);
+    const [filter, setFilter] = useState({
+        time: '',
+        person_uuid: '',
+        room_id: '',
+        allowed: '',
+        entered: ''
+    });
+
+    const handleFilterChange = (e) => {
+        setFilter({
+            ...filter,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const applyFilters = (logs) => {
+        return logs.filter(log => {
+            return (filter.time ? log.time.includes(filter.time) : true)
+                && (filter.person_uuid ? log.person_uuid === filter.person_uuid : true)
+                && (filter.room_id ? log.room_id.toString() === filter.room_id : true)
+                && (filter.allowed ? log.allowed.toString() === filter.allowed : true)
+                && (filter.entered ? log.entered.toString() === filter.entered : true);
+        });
+    };
 
     if (isError) {
         return <>Ошибка</>;
@@ -85,9 +109,26 @@ const CabinetInfo: React.FC<CabinetInfoProps> = ({ room_id }) => {
         return <><DNA /></>;
     }
 
+    const filteredData = applyFilters(data);
+
     return (
         <div style={{ overflowY: "auto", maxHeight: '65vh' }}>
             <h3>Логи</h3>
+            <div className="filters">
+                <input name="time" placeholder="Filter by Time" value={filter.time} onChange={handleFilterChange} />
+                <input name="person_uuid" placeholder="Filter by UUID" value={filter.person_uuid} onChange={handleFilterChange} />
+                <input name="room_id" placeholder="Filter by Room ID" value={filter.room_id} onChange={handleFilterChange} />
+                <select name="allowed" value={filter.allowed} onChange={handleFilterChange}>
+                    <option value="">All</option>
+                    <option value="true">Allowed</option>
+                    <option value="false">Not Allowed</option>
+                </select>
+                <select name="entered" value={filter.entered} onChange={handleFilterChange}>
+                    <option value="">All</option>
+                    <option value="true">Entered</option>
+                    <option value="false">Not Entered</option>
+                </select>
+            </div>
             <table className="AccessTable">
                 <thead>
                     <tr>
@@ -99,7 +140,7 @@ const CabinetInfo: React.FC<CabinetInfoProps> = ({ room_id }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {isSuccess && data.map((log, index) => (
+                    {isSuccess && filteredData.map((log, index) => (
                         <tr key={index}>
                             <td>{log.time}</td>
                             <td>{log.person_uuid}</td>
