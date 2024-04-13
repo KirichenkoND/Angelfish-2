@@ -2,11 +2,13 @@ use axum::Router;
 use dotenvy::var;
 use sqlx::PgPool;
 use tokio::net::TcpListener;
+use tower_sessions_sqlx_store::PostgresStore;
 use tracing::{debug, info, Level};
 use tracing_subscriber::EnvFilter;
 use utoipa_swagger_ui::SwaggerUi;
 
 mod error;
+mod middleware;
 mod models;
 mod routes;
 
@@ -37,16 +39,23 @@ async fn main() -> Result<(), error::Error> {
     openapi.merge(routes::rooms::openapi());
     openapi.merge(routes::perms::openapi());
     openapi.merge(routes::logs::openapi());
+    openapi.merge(routes::auth::openapi());
 
+    let session_store = PostgresStore::new(db.clone());
+    session_store.migrate().await?;
+
+    let session_layer = tower_sessions::SessionManagerLayer::new(session_store);
     let swagger = SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", openapi);
 
     let app = Router::new()
-        .nest("/categories", routes::categories::router())
-        .nest("/roles", routes::roles::router())
-        .nest("/people", routes::people::router())
-        .nest("/rooms", routes::rooms::router())
-        .nest("/permissions", routes::perms::router())
-        .nest("/logs", routes::logs::router())
+        .nest("/categories", routes::categories::router(&db))
+        .nest("/roles", routes::roles::router(&db))
+        .nest("/people", routes::people::router(&db))
+        .nest("/rooms", routes::rooms::router(&db))
+        .nest("/permissions", routes::perms::router(&db))
+        .nest("/logs", routes::logs::router(&db))
+        .nest("/auth", routes::auth::router())
+        .layer(session_layer)
         .merge(swagger)
         .with_state(db);
 

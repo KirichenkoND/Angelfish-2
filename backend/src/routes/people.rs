@@ -1,18 +1,26 @@
 use super::{Json, Query, RouteResult, RouteState};
-use crate::models::Person;
+use crate::{
+    middleware::{protect_admin, protect_guard},
+    models::Person,
+};
 use anyhow::anyhow;
+use argon2::PasswordHasher;
+use argon2::{password_hash::SaltString, Argon2};
 use axum::{
     extract::{Path, State},
+    middleware::from_fn_with_state,
     routing::*,
 };
+use rand::rngs::OsRng;
 use serde::Deserialize;
 use sqlx::PgPool;
-use utoipa::{openapi::OpenApi, IntoParams};
+use utoipa::{openapi::OpenApi, IntoParams, ToSchema};
 use uuid::Uuid;
 
 #[derive(Deserialize, IntoParams)]
 struct FetchQuery {
     name: Option<String>,
+    phone: Option<String>,
     uuid: Option<Uuid>,
     banned: Option<bool>,
 }
@@ -20,6 +28,7 @@ struct FetchQuery {
 /// Fetch people
 #[utoipa::path(
     get,
+    tag = "People management",
     path = "/people",
     params(FetchQuery),
     responses(
@@ -30,7 +39,12 @@ async fn fetch(
     State(db): RouteState,
     Query(query): Query<FetchQuery>,
 ) -> RouteResult<Json<Vec<Person>>> {
-    let FetchQuery { name, uuid, banned } = query;
+    let FetchQuery {
+        name,
+        uuid,
+        banned,
+        phone,
+    } = query;
 
     let results = sqlx::query_as::<_, Person>(
         r#"
@@ -39,36 +53,60 @@ async fn fetch(
             WHERE
                 lower(concat(first_name, last_name, middle_name)) LIKE coalesce('%' || lower($1) || '%', '%') AND
                 coalesce(uuid = $2, true) AND
-                coalesce(banned = $3, true)
+                coalesce(banned = $3, true) AND
+                coalesce(phone LIKE '%' || $4 || '%', true)
         "#,
-    ).bind(name).bind(uuid).bind(banned).fetch_all(&db).await?;
+    ).bind(name).bind(uuid).bind(banned).bind(phone).fetch_all(&db).await?;
 
     Ok(Json(results))
+}
+
+#[derive(Deserialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+struct CreatePersonRequest {
+    uuid: Option<Uuid>,
+    first_name: String,
+    last_name: String,
+    middle_name: Option<String>,
+    role: String,
+    phone: Option<String>,
+    password: Option<String>,
 }
 
 /// Create new person record
 /// Only `uuid`, `first_name`, `last_name`, `middle_name`, `role` fields are used.
 #[utoipa::path(
     post,
+    tag = "People management",
     path = "/people",
-    request_body = Person,
+    request_body = CreatePersonRequest,
 )]
-async fn create(State(db): RouteState, Json(data): Json<Person>) -> RouteResult {
-    let Person {
+async fn create(State(db): RouteState, Json(data): Json<CreatePersonRequest>) -> RouteResult {
+    let CreatePersonRequest {
         uuid,
         first_name,
         last_name,
         middle_name,
         role,
-        ..
+        phone,
+        password,
     } = data;
+
+    let password_hash = password.map(|pass| {
+        Argon2::default()
+            .hash_password(pass.as_bytes(), &SaltString::generate(OsRng))
+            .unwrap()
+            .to_string()
+    });
 
     sqlx::query!(
         r#"
-        INSERT INTO Person(uuid, first_name, last_name, middle_name, role_id) VALUES(
+        INSERT INTO Person(uuid, first_name, last_name, middle_name, role_id, phone, password_hash) VALUES(
             coalesce($1, gen_random_uuid()),
             $2, $3, $4,
-            coalesce((SELECT id FROM Role WHERE role = $5), 0)
+            coalesce((SELECT id FROM Role WHERE role = $5), 0),
+            $6,
+            $7
         )
     "#,
         uuid,
@@ -76,6 +114,8 @@ async fn create(State(db): RouteState, Json(data): Json<Person>) -> RouteResult 
         last_name,
         middle_name,
         role,
+        phone,
+        password_hash
     )
     .execute(&db)
     .await?;
@@ -86,6 +126,7 @@ async fn create(State(db): RouteState, Json(data): Json<Person>) -> RouteResult 
 /// Edits person record
 #[utoipa::path(
     put,
+    tag = "People management",
     path = "/people/{uuid}",
     params(
         ("uuid" = Uuid, Path, description = "Uuid of the person to edit")
@@ -105,6 +146,7 @@ async fn change(
         role,
         banned,
         ban_reason,
+        phone,
     } = data;
 
     sqlx::query!(
@@ -116,7 +158,8 @@ async fn change(
             middle_name = $4,
             role_id = (SELECT id FROM Role WHERE role = $5),
             banned = $6,
-            ban_reason = $7
+            ban_reason = $7,
+            phone = $9
         WHERE
             uuid = $8
     "#,
@@ -127,7 +170,8 @@ async fn change(
         role,
         banned,
         ban_reason,
-        uuid
+        uuid,
+        phone
     )
     .execute(&db)
     .await?;
@@ -138,6 +182,7 @@ async fn change(
 /// Deletes person record
 #[utoipa::path(
     delete,
+    tag = "People management",
     path = "/people/{uuid}",
     params(
         ("uuid" = Uuid, Path, description = "Uuid of the person to delete")
@@ -164,15 +209,27 @@ pub fn openapi() -> OpenApi {
             super::people::change,
             super::people::remove
         ),
-        components(schemas(Person))
+        components(schemas(Person, CreatePersonRequest))
     )]
     struct ApiDoc;
 
     <ApiDoc as utoipa::OpenApi>::openapi()
 }
 
-pub fn router() -> Router<PgPool> {
+pub fn router(db: &PgPool) -> Router<PgPool> {
     Router::new()
-        .route("/", get(fetch).post(create))
-        .route("/:uuid", put(change).delete(remove))
+        .route(
+            "/",
+            get(fetch).layer(from_fn_with_state(db.clone(), protect_guard)),
+        )
+        .route(
+            "/",
+            post(create).layer(from_fn_with_state(db.clone(), protect_admin)),
+        )
+        .route(
+            "/:uuid",
+            put(change)
+                .delete(remove)
+                .layer(from_fn_with_state(db.clone(), protect_admin)),
+        )
 }

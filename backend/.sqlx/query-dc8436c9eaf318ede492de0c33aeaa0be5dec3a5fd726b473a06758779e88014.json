@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE Person SET\n            uuid = coalesce($1, uuid),\n            first_name = $2,\n            last_name = $3,\n            middle_name = $4,\n            role_id = (SELECT id FROM Role WHERE role = $5),\n            banned = $6,\n            ban_reason = $7,\n            phone = $9\n        WHERE\n            uuid = $8\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Bool",
+        "Text",
+        "Uuid",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dc8436c9eaf318ede492de0c33aeaa0be5dec3a5fd726b473a06758779e88014"
+}

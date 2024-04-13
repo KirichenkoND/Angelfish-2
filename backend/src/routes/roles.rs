@@ -1,8 +1,10 @@
 use super::{Json, Query, RouteResult, RouteState};
+use crate::middleware::{protect_admin, protect_guard};
 use anyhow::anyhow;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
+    middleware::from_fn_with_state,
     routing::*,
 };
 use serde::Deserialize;
@@ -15,7 +17,7 @@ struct FetchQuery {
 }
 
 /// Fetch user roles
-#[utoipa::path(get, path = "/roles", params(FetchQuery), responses((status = 200, body = Vec<String>)))]
+#[utoipa::path(get, tag = "Role management", path = "/roles", params(FetchQuery), responses((status = 200, body = Vec<String>)))]
 async fn fetch(
     State(db): RouteState,
     Query(query): Query<FetchQuery>,
@@ -38,7 +40,7 @@ async fn fetch(
 }
 
 /// Create new user role
-#[utoipa::path(post, path = "/roles/{role}", params(("role" = String, Path, description = "New user role name")))]
+#[utoipa::path(post, tag = "Role management", path = "/roles/{role}", params(("role" = String, Path, description = "New user role name")))]
 async fn create(Path(role): Path<String>, State(db): RouteState) -> RouteResult<()> {
     let result = sqlx::query!("INSERT INTO Role(role) VALUES($1)", role)
         .execute(&db)
@@ -55,7 +57,7 @@ async fn create(Path(role): Path<String>, State(db): RouteState) -> RouteResult<
 }
 
 /// Delete user role
-#[utoipa::path(delete, path = "/roles/{role}", params(("role" = String, Path, description = "User role name")))]
+#[utoipa::path(delete, tag = "Role management", path = "/roles/{role}", params(("role" = String, Path, description = "User role name")))]
 async fn remove(Path(category): Path<String>, State(db): RouteState) -> RouteResult<StatusCode> {
     let result = sqlx::query!("DELETE FROM Role WHERE role = $1", category)
         .execute(&db)
@@ -75,8 +77,16 @@ pub fn openapi() -> OpenApi {
     <ApiDoc as utoipa::OpenApi>::openapi()
 }
 
-pub fn router() -> Router<PgPool> {
+pub fn router(db: &PgPool) -> Router<PgPool> {
     Router::new()
-        .route("/", get(fetch))
-        .route("/:role", post(create).delete(remove))
+        .route(
+            "/",
+            get(fetch).layer(from_fn_with_state(db.clone(), protect_guard)),
+        )
+        .route(
+            "/:role",
+            post(create)
+                .delete(remove)
+                .layer(from_fn_with_state(db.clone(), protect_admin)),
+        )
 }

@@ -22,6 +22,7 @@ impl<T: Serialize> IntoResponse for Json<T> {
 #[from_request(rejection(crate::error::Error))]
 struct Query<T>(pub T);
 
+pub mod auth;
 pub mod categories;
 pub mod logs;
 pub mod people;

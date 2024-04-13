@@ -1,6 +1,6 @@
 use super::{Json, Query, RouteResult, RouteState};
-use crate::models::Log;
-use axum::{extract::State, routing::get, Router};
+use crate::{middleware::protect_guard, models::Log};
+use axum::{extract::State, middleware::from_fn_with_state, routing::get, Router};
 use serde::Deserialize;
 use sqlx::PgPool;
 use time::OffsetDateTime;
@@ -24,6 +24,7 @@ struct FetchQuery {
 /// Get logs
 #[utoipa::path(
     get,
+    tag = "Log history",
     path = "/logs",
     params(FetchQuery),
     responses(
@@ -77,6 +78,8 @@ pub fn openapi() -> OpenApi {
     <ApiDoc as utoipa::OpenApi>::openapi()
 }
 
-pub fn router() -> Router<PgPool> {
-    Router::new().route("/", get(fetch))
+pub fn router(db: &PgPool) -> Router<PgPool> {
+    Router::new()
+        .route("/", get(fetch))
+        .layer(from_fn_with_state(db.clone(), protect_guard))
 }

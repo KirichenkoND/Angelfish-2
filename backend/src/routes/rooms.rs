@@ -1,9 +1,13 @@
 use super::{Json, Query, RouteResult, RouteState};
-use crate::models::Room;
+use crate::{
+    middleware::{protect_admin, protect_guard},
+    models::Room,
+};
 use anyhow::anyhow;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
+    middleware::from_fn_with_state,
     routing::*,
 };
 use serde::Deserialize;
@@ -13,6 +17,7 @@ use uuid::Uuid;
 
 #[derive(Deserialize, IntoParams)]
 struct Fetch {
+    id: Option<i32>,
     floor: Option<i32>,
     category: Option<String>,
     name: Option<String>,
@@ -23,6 +28,7 @@ struct Fetch {
 /// Fetch rooms
 #[utoipa::path(
     get,
+    tag = "Room management",
     path = "/rooms",
     params(Fetch),
     responses(
@@ -31,6 +37,7 @@ struct Fetch {
 )]
 async fn fetch(State(db): RouteState, Query(query): Query<Fetch>) -> RouteResult<Json<Vec<Room>>> {
     let Fetch {
+        id,
         floor,
         name,
         count,
@@ -52,7 +59,8 @@ async fn fetch(State(db): RouteState, Query(query): Query<Fetch>) -> RouteResult
         WHERE
             coalesce(lower(room) LIKE ('%' || lower($3) || '%'), true) AND
             coalesce(floor = $4, true) AND
-            (category = any($5) OR cardinality($5) = 0)
+            (category = any($5) OR cardinality($5) = 0) AND
+            (Room.id = $6 OR $6 IS NULL)
         LIMIT $1 OFFSET $2
     "#,
     )
@@ -61,6 +69,7 @@ async fn fetch(State(db): RouteState, Query(query): Query<Fetch>) -> RouteResult
     .bind(name)
     .bind(floor)
     .bind(categories)
+    .bind(id)
     .fetch_all(&db)
     .await?;
 
@@ -71,6 +80,7 @@ async fn fetch(State(db): RouteState, Query(query): Query<Fetch>) -> RouteResult
 /// Only `category`, `floor`, `name` fields are used.
 #[utoipa::path(
     post,
+tag = "Room management",
     path = "/rooms",
     request_body = Room
 )]
@@ -111,7 +121,7 @@ enum Direction {
 }
 
 /// Try to enter/leave a room (EMBEDDED API)
-#[utoipa::path(post, path = "/rooms/{room_id}/{direction}/{person_uuid}", params(
+#[utoipa::path(post, tag = "Room management", path = "/rooms/{room_id}/{direction}/{person_uuid}", params(
     ("room_id" = i32, Path, description = "Id of the room"),
     ("direction" = Direction, Path, description = "Enter/leave"),
     ("person_uuid" = Uuid, Path, description = "Uuid of the person trying to access the room")
@@ -156,7 +166,7 @@ async fn pass(
 }
 
 /// Delete room
-#[utoipa::path(delete, path = "/rooms/{room_id}", params(("room_id" = i32, Path, description = "Id of the room to delete")))]
+#[utoipa::path(delete, tag = "Room management", path = "/rooms/{room_id}", params(("room_id" = i32, Path, description = "Id of the room to delete")))]
 async fn remove(Path(room_id): Path<i32>, State(db): RouteState) -> RouteResult<StatusCode> {
     let result = sqlx::query!("DELETE FROM Room WHERE id = $1", room_id)
         .execute(&db)
@@ -184,9 +194,19 @@ pub fn openapi() -> OpenApi {
     <ApiDoc as utoipa::OpenApi>::openapi()
 }
 
-pub fn router() -> Router<PgPool> {
+pub fn router(db: &PgPool) -> Router<PgPool> {
     Router::new()
-        .route("/", get(fetch).post(create))
-        .route("/:room_id", delete(remove))
+        .route(
+            "/",
+            get(fetch).layer(from_fn_with_state(db.clone(), protect_guard)),
+        )
+        .route(
+            "/",
+            post(create).layer(from_fn_with_state(db.clone(), protect_admin)),
+        )
+        .route(
+            "/:room_id",
+            delete(remove).layer(from_fn_with_state(db.clone(), protect_admin)),
+        )
         .route("/:room_id/:direction/:person_uuid", post(pass))
 }
