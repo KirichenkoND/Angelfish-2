@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import './MapBuilding.scss';
 import { useGetRoomQuery } from "../../api/roomsApi";
 import Popup from "../Popup/Popup";
-import { useGetLogsQuery } from "../../api/logsApi";
+import { useGetLogsByRoomIdQuery } from "../../api/logsApi";
 import { DNA } from "react-loader-spinner";
 
 
@@ -75,7 +75,7 @@ const FloorsMF: React.FC<FloorsMFProps> = ({ propfloors, setCurrentFloor, curren
 }
 
 const CabinetInfo: React.FC<CabinetInfoProps> = ({ room_id }) => {
-    const { data, isLoading, isError, isSuccess } = useGetLogsQuery(room_id);
+    const { data, isLoading, isError, isSuccess } = useGetLogsByRoomIdQuery(room_id);
     const [filter, setFilter] = useState({
         time: '',
         person_uuid: '',
@@ -146,7 +146,7 @@ const CabinetInfo: React.FC<CabinetInfoProps> = ({ room_id }) => {
                             <td>{log.person_uuid}</td>
                             <td>{log.room_id}</td>
                             <td>{log.allowed ? 'Yes' : 'No'}</td>
-                            <td>{log.entered ? 'Yes' : 'No'}</td>
+                            <td>{log.entered ? 'Вход' : 'Выход'}</td>
                         </tr>
                     ))}
                 </tbody>
